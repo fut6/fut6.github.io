@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <link rel="icon" type="image/x-icon" href="assets/images/log3.png"> 
+    <title>Liga de fut 6 SSA - Oficial</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #F8FAFC; transition: background-color 0.5s, color 0.5s; }
+        .font-sport { font-family: 'Chakra Petch', sans-serif; }
+        .slider-wrapper { overflow: hidden; }
+        #slider-track { display: flex; transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1); }
+        .floating-btn { animation: float 3s ease-in-out infinite; }
+        @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255,255,255,0.1); }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 4px; }
+    </style>
+</head>
+<body class="text-slate-800 antialiased selection:bg-indigo-600 selection:text-white">
+
+    <header class="bg-indigo-950 text-white sticky top-0 z-50 shadow-2xl border-b-4 border-emerald-500">
+        <nav class="container mx-auto px-4 h-20 flex justify-between items-center">
+            <a href="index.html" class="flex items-center gap-3 group">
+                <div class="bg-white/10 p-2 rounded-xl group-hover:rotate-6 transition-transform border border-white/10">
+                    <img src="assets/images/logo2.png" class="h-8 w-8 brightness-200">
+                </div>
+                <div class="flex flex-col">
+                    <span class="font-sport font-black text-2xl italic tracking-wide leading-none">LIGA<span class="text-emerald-400">SSA</span></span>
+                    <span class="text-[8px] font-bold text-indigo-300 uppercase tracking-[0.3em] leading-none ml-0.5">Oficial</span>
+                </div>
+            </a>
+            <div class="hidden md:flex gap-8 text-[11px] font-black uppercase tracking-[0.15em] items-center text-slate-300">
+                <a href="index.html" class="text-emerald-400 relative after:content-[''] after:block after:w-full after:h-0.5 after:bg-emerald-400 after:absolute after:-bottom-2">Inicio</a>
+                <a href="tabla.html" class="hover:text-emerald-400 transition">Tabla</a>
+                <a href="goleo.html" class="hover:text-emerald-400 transition">Goleo</a>
+                <a href="equipos.html" class="hover:text-emerald-400 transition">Equipos</a>
+                <a href="jornadas.html" class="hover:text-emerald-400 transition">Jornadas</a>
+                <a href="galeria.html" class="hover:text-emerald-400 transition">Galería</a>
+                <a href="informacion.html" class="bg-white/10 border border-white/20 px-4 py-2 rounded-full hover:bg-emerald-400 hover:text-indigo-900 transition">Info</a>
+            </div>
+            <button id="mobile-toggle" class="md:hidden text-2xl focus:outline-none">☰</button>
+        </nav>
+        <div id="mobile-menu" class="hidden bg-indigo-900 p-4 md:hidden border-t border-indigo-800 absolute w-full shadow-2xl z-50">
+            <a href="index.html" class="block py-3 font-bold hover:text-emerald-400 border-b border-indigo-800 text-sm">Inicio</a>
+            <a href="tabla.html" class="block py-3 font-bold hover:text-emerald-400 border-b border-indigo-800 text-sm">Tabla General</a>
+            <a href="goleo.html" class="block py-3 font-bold text-emerald-400 border-b border-indigo-800 text-sm">Goleo</a>
+            <a href="equipos.html" class="block py-3 font-bold hover:text-emerald-400 text-sm">Equipos</a>
+            <a href="jornadas.html" class="block py-3 font-bold hover:text-emerald-400 border-b border-indigo-800 text-sm">Jornadas</a>
+            <a href="galeria.html" class="block py-3 font-bold hover:text-emerald-400 border-b border-indigo-800 text-sm">Galería</a>
+            <a href="informacion.html" class="block py-3 font-bold text-emerald-400 border-b border-indigo-800 text-sm">Informacion</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8 max-w-7xl">
+        <div id="league-stats-container" class="bg-indigo-600 rounded-[2rem] p-8 shadow-xl mb-16 text-white transform md:-skew-x-3 mx-2 md:mx-0 border-b-8 border-indigo-800 relative overflow-hidden">
+            <div class="absolute inset-0 bg-[url('assets/images/pattern.png')] opacity-10 mix-blend-overlay"></div>
+        </div>
+
+        <div class="grid md:grid-cols-12 gap-6 mb-20">
+            <div class="md:col-span-8 relative rounded-[2.5rem] shadow-2xl h-[450px] overflow-hidden group border-4 border-white">
+                <div id="slider-track" class="flex h-full transition-transform duration-500 ease-out"></div>
+                <div class="absolute top-8 left-8 z-20">
+                    <span class="bg-white/20 backdrop-blur-md border border-white/30 text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg">Clausura 2025</span>
+                </div>
+            </div>
+            <div class="md:col-span-4 bg-indigo-950 rounded-[2.5rem] p-8 shadow-2xl text-white flex flex-col justify-between border-4 border-indigo-900 relative overflow-hidden h-[450px]">
+                <div class="absolute top-0 right-0 w-48 h-48 bg-emerald-600 rounded-full blur-[80px] opacity-20"></div>
+                <div id="countdown-widget" class="relative z-10 mb-6 bg-white/5 p-6 rounded-2xl backdrop-blur-sm border border-white/10 shadow-inner"></div>
+                <div class="relative z-10 flex-1 flex flex-col justify-end">
+                    <h3 class="font-sport font-bold text-xs uppercase mb-3 text-emerald-400 tracking-[0.2em] border-b border-white/10 pb-2">Tablón de Anuncios</h3>
+                    <div id="avisos-container" class="space-y-3 h-40 overflow-y-auto pr-2 custom-scrollbar"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-24 relative">
+            <div class="absolute inset-0 flex items-center" aria-hidden="true"><div class="w-full border-t border-slate-200"></div></div>
+            <div class="relative flex justify-center"><span class="bg-slate-50 px-6 text-xs font-black text-slate-400 uppercase tracking-[0.3em]">Nuestros Aliados Oficiales</span></div>
+            <div id="patrocinadores-grid" class="flex flex-wrap justify-center gap-8 items-center mt-10"></div>
+        </div>
+
+        <div id="mvp-container" class="mb-24"></div>
+
+        <div class="grid md:grid-cols-3 gap-8 mb-24">
+            <div class="bg-white rounded-[2.5rem] p-8 shadow-xl shadow-slate-200/50 border border-slate-100 relative overflow-hidden group hover:shadow-2xl transition-all duration-500">
+                <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-indigo-500 to-purple-600"></div>
+                <div class="flex justify-between items-center mb-8"><h3 class="font-sport font-black text-2xl uppercase text-slate-900 italic">Posiciones</h3><a href="tabla.html" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:bg-indigo-600 hover:text-white transition">→</a></div>
+                <table class="w-full text-sm text-left"><tbody id="tabla-body" data-mini="true"></tbody></table>
+            </div>
+            <div class="bg-white rounded-[2.5rem] p-8 shadow-xl shadow-slate-200/50 border border-slate-100 relative overflow-hidden group hover:shadow-2xl transition-all duration-500">
+                <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-amber-400 to-orange-600"></div>
+                <div class="flex justify-between items-center mb-8"><h3 class="font-sport font-black text-2xl uppercase text-slate-900 italic">Artilleros</h3><a href="goleo.html" class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 hover:bg-indigo-600 hover:text-white transition">→</a></div>
+                <div id="top-scorers-list" class="space-y-3"></div>
+            </div>
+            <div class="bg-indigo-950 rounded-[2.5rem] p-8 shadow-2xl text-white flex flex-col relative overflow-hidden group">
+                <div class="absolute -right-20 -bottom-20 w-64 h-64 bg-emerald-600 rounded-full blur-[80px] opacity-20 group-hover:opacity-30 transition-opacity duration-700"></div>
+                <div class="relative z-10">
+                    <div class="flex justify-between items-center mb-8"><h3 class="font-sport font-black text-2xl uppercase italic">En Juego</h3><span id="jornada-badge" class="text-[10px] bg-emerald-500 text-indigo-950 px-3 py-1 rounded-full font-black uppercase tracking-wider">Jornada</span></div>
+                    <div id="next-matches-list" class="space-y-3 mb-6"></div>
+                    <a href="jornadas.html" class="block w-full py-4 rounded-xl bg-white/5 border border-white/10 text-center font-black text-xs uppercase tracking-widest hover:bg-white hover:text-indigo-900 transition-all">Calendario Completo</a>
+                </div>
+            </div>
+        </div>
+
+        <section id="playoffs-wrapper" class="hidden mb-24 bg-slate-900 rounded-[3rem] p-8 md:p-16 relative overflow-hidden shadow-2xl border-t-8 border-emerald-500">
+            <div class="absolute inset-0 bg-[url('assets/images/pattern.png')] opacity-5 mix-blend-overlay"></div>
+            <div class="relative z-10">
+                <div class="text-center mb-16"><span class="text-emerald-400 font-bold text-xs uppercase tracking-[0.4em] mb-2 block">Definición del Título</span><h2 class="text-5xl md:text-7xl font-sport font-black text-white uppercase italic">Fase Final</h2></div>
+                <div class="grid md:grid-cols-3 gap-8">
+                    <div class="space-y-6"><h4 class="font-black text-slate-500 text-xs uppercase text-center tracking-[0.2em] mb-6 border-b border-slate-800 pb-2">Cuartos de Final</h4><div id="cuartos-container" class="space-y-4"></div></div>
+                    <div class="space-y-6"><h4 class="font-black text-slate-500 text-xs uppercase text-center tracking-[0.2em] mb-6 border-b border-slate-800 pb-2">Semifinales</h4><div id="semis-container" class="space-y-4"></div></div>
+                    <div class="space-y-6"><h4 class="font-black text-emerald-500 text-xs uppercase text-center tracking-[0.2em] mb-6 border-b border-emerald-900/50 pb-2">Gran Final</h4><div id="final-container" class="space-y-4"></div></div>
+                </div>
+            </div>
+        </section>
+
+        <div class="mb-16">
+            <div class="flex items-end justify-between mb-10 px-2"><div><h2 class="text-3xl font-sport font-black text-indigo-900 uppercase italic">Galería</h2><p class="text-slate-400 text-sm mt-1 font-medium tracking-wide">Los mejores momentos del torneo</p></div><a href="galeria.html" class="text-xs font-black uppercase tracking-widest text-indigo-600 border-b-2 border-indigo-600 pb-1 hover:text-indigo-800 hover:border-indigo-800 transition">Ver Todas</a></div>
+            <div id="galeria-grid" data-mini="true" class="grid grid-cols-2 md:grid-cols-4 gap-6"></div>
+        </div>
+    </main>
+
+    <footer class="bg-indigo-950 text-slate-400 py-16 border-t-8 border-emerald-500 relative overflow-hidden">
+        <div class="container mx-auto px-4 text-center relative z-10">
+            <div class="flex justify-center items-center gap-4 mb-10"><img src="assets/images/logo2.png" class="h-12 w-12 grayscale opacity-20"><span class="font-sport font-black text-3xl italic text-slate-700 tracking-wide">LIGA SSA</span></div>
+            <div class="flex flex-col md:flex-row justify-center gap-8 mb-10 text-xs font-bold uppercase tracking-widest text-slate-500">
+                <a href="index.html" class="hover:text-emerald-400 transition">Inicio</a>
+                <a href="tabla.html" class="hover:text-emerald-400 transition">Tabla</a>
+                <a href="goleo.html" class="hover:text-emerald-400 transition">Goleo</a>
+                <a href="jornadas.html" class="hover:text-emerald-400 transition">Calendario</a>
+            </div>
+            <button id="btn-admin-access" class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-600 hover:text-white border border-slate-800 hover:border-emerald-500 px-8 py-3 rounded-full transition duration-500 mb-8">Acceso Administrativo</button>
+            <p class="text-[10px] opacity-30">© 2025 Liga de Futbol 6 SSA. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    <a id="btn-whatsapp" href="#" target="_blank" class="fixed bottom-8 right-8 bg-emerald-500 text-white p-4 rounded-full shadow-2xl hover:scale-110 transition-transform floating-btn z-40 border-4 border-white/20">
+        <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+    </a>
+
+    <div id="login-modal" class="fixed inset-0 bg-indigo-950/90 hidden z-[100] flex items-center justify-center p-4 backdrop-blur-md">
+        <div class="bg-white p-10 rounded-[2.5rem] shadow-2xl w-full max-w-sm relative border-t-8 border-indigo-600 transform scale-100 transition-transform">
+            <button id="close-modal-btn" class="absolute top-6 right-6 text-slate-300 hover:text-indigo-600 text-3xl transition-colors">&times;</button>
+            <div class="text-center mb-10">
+                <h2 class="text-3xl font-sport font-black text-indigo-900 mb-1 text-center uppercase italic">Hola Admin</h2>
+                <p class="text-xs text-slate-400 uppercase tracking-widest">Ingresa tus credenciales</p>
+            </div>
+            
+            <form id="login-form" class="space-y-6">
+                <div>
+                    <input type="email" id="email" class="w-full px-6 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-indigo-600 focus:bg-white text-sm font-bold transition-all text-center placeholder-slate-300" placeholder="usuario@liga.com">
+                </div>
+                <div>
+                    <input type="password" id="password" class="w-full px-6 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-indigo-600 focus:bg-white text-sm font-bold transition-all text-center placeholder-slate-300" placeholder="••••••">
+                </div>
+                <button type="submit" class="w-full bg-indigo-600 text-white font-black py-4 rounded-2xl hover:bg-indigo-500 transition shadow-xl shadow-indigo-600/30 uppercase tracking-widest text-xs mt-4 transform active:scale-95">Ingresar al Panel</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="lightbox-modal" class="fixed inset-0 bg-black/98 hidden z-[100] flex items-center justify-center p-4">
+        <button id="close-lightbox" class="absolute top-8 right-8 text-white text-5xl hover:text-emerald-400 transition transform hover:rotate-90">&times;</button>
+        <img id="lightbox-img" class="max-w-full max-h-[85vh] rounded-xl shadow-2xl border-4 border-white/10">
+    </div>
+
+<script>
+        (function() {
+            var v = new Date().getTime(); // Truco anti-caché
+            
+            // 1. Crear el script de DATOS
+            var dataScript = document.createElement('script');
+            dataScript.src = 'assets/js/data.js?v=' + v;
+            
+            // 2. Decirle: "AVÍSAME cuando termines de cargar"
+            dataScript.onload = function() {
+                // 3. SOLO AHORA cargamos el Main (el cerebro)
+                var mainScript = document.createElement('script');
+                mainScript.src = 'assets/js/main.js?v=' + v;
+                document.body.appendChild(mainScript);
+            };
+            
+            // 4. Iniciar la carga
+            document.body.appendChild(dataScript);
+        })();
+    </script>
+</body>
+</html>

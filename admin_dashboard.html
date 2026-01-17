@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+    <title>Panel Admin - Liga SSA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #F1F5F9; transition: background 0.5s, color 0.5s; }
+        .font-sport { font-family: 'Chakra Petch', sans-serif; }
+        .hidden { display: none !important; }
+        .input-admin { width: 100%; background: #f8fafc; border: 1px solid #cbd5e1; padding: 8px; border-radius: 8px; font-size: 0.9rem; outline: none; transition: all 0.2s; }
+        .input-admin:focus { border-color: #4f46e5; background: white; }
+        .file-upload-label { border: 2px dashed #cbd5e1; padding: 10px; display: block; text-align: center; cursor: pointer; border-radius: 8px; font-size: 0.8rem; font-weight: bold; color: #64748b; transition: all 0.3s; }
+        .file-upload-label:hover { background: #e0e7ff; color: #4338ca; border-color: #4338ca; }
+    </style>
+</head>
+<body class="p-4 md:p-8 text-slate-800 pb-32">
+    <div class="max-w-7xl mx-auto">
+        
+        <header class="flex flex-col md:flex-row justify-between items-center mb-8 bg-indigo-950 text-white p-6 rounded-2xl shadow-xl border-b-4 border-emerald-500 sticky top-0 z-40">
+            <div class="flex items-center gap-4">
+                <div class="bg-white/10 p-2 rounded-lg"><span class="text-2xl">⚡</span></div>
+                <div>
+                    <h1 class="text-xl font-bold font-sport italic tracking-wide">PANEL DE CONTROL</h1>
+                    <p class="text-xs text-indigo-200 uppercase tracking-widest" id="role-display">Verificando...</p>
+                </div>
+            </div>
+            <div class="flex gap-3 mt-4 md:mt-0">
+                <button onclick="saveToMemory(true)" class="bg-emerald-500 hover:bg-emerald-600 text-indigo-950 px-6 py-3 rounded-xl font-black text-xs uppercase transition shadow-lg flex items-center gap-2 active:scale-95">
+                    💾 Guardar Todo
+                </button>
+                <button onclick="logout()" class="bg-rose-600 hover:bg-rose-700 px-4 py-3 rounded-xl font-bold text-xs uppercase transition shadow-lg">
+                    Salir
+                </button>
+                <button onclick="publishToGitHub()" class="bg-indigo-600 text-white px-4 py-3 rounded-xl font-bold text-xs uppercase shadow-lg animate-pulse border border-indigo-400"> ☁️ Publicar</button>
+                <button onclick="openConfigModal()" class="bg-slate-700 text-white px-4 py-3 rounded-xl font-bold text-xs uppercase">⚙️ Token</button>
+            </div>
+        </header>
+
+        <div id="super-admin-area" class="hidden mb-8 space-y-6">
+            <div class="bg-white p-6 rounded-3xl shadow-sm border-t-4 border-amber-500">
+                <h2 class="font-bold text-lg text-slate-800 mb-4 flex items-center gap-2">⚙️ Configuración General</h2>
+                <div class="grid md:grid-cols-4 gap-6">
+                    <div><label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Fase Torneo</label><select id="conf-fase" class="input-admin font-bold"><option value="regular">Fase Regular</option><option value="playoffs">Playoffs (Finales)</option></select></div>
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Atmósfera Visual</label>
+                        <select id="conf-tema" class="input-admin font-bold text-purple-600">
+                            <option value="default">⚪ Clásico</option>
+                            <optgroup label="Colores Sólidos">
+                                <option value="neon-green">🟢 Toxic</option>
+                                <option value="neon-blue">🔵 Cyber</option>
+                                <option value="neon-cyan">💠 Tron</option>
+                                <option value="neon-pink">🩷 Miami</option>
+                                <option value="neon-purple">🟣 Galaxy</option>
+                                <option value="neon-orange">🟠 Magma</option>
+                                <option value="neon-red">🔴 Sith</option>
+                                <option value="neon-gold">🟡 Luxury</option>
+                            </optgroup>
+                            <optgroup label="Mezclas Exóticas">
+                                <option value="mix-sunset">🌅 Sunset</option>
+                                <option value="mix-ocean">🌊 Ocean</option>
+                                <option value="mix-venom">🧪 Venom</option>
+                                <option value="mix-fire">🔥 Hellfire</option>
+                            </optgroup>
+                        </select>
+                    </div>
+                    <div><label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Fecha Final</label><input type="datetime-local" id="conf-fecha" class="input-admin"></div>
+                    <div><label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">WhatsApp</label><input type="text" id="conf-wa" class="input-admin" placeholder="521..."></div>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-3xl shadow-sm border-t-4 border-rose-500">
+                <h2 class="font-bold text-lg text-slate-800 mb-4 flex items-center gap-2">🔐 Gestión de Accesos</h2>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                        <h4 class="text-xs font-black text-indigo-900 uppercase tracking-widest mb-3">Super Admin</h4>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div><label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Usuario</label><input type="text" id="auth-super-user" class="input-admin font-bold text-rose-600"></div>
+                            <div><label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Pass</label><input type="text" id="auth-super-pass" class="input-admin font-bold text-slate-600"></div>
+                        </div>
+                    </div>
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                        <h4 class="text-xs font-black text-indigo-900 uppercase tracking-widest mb-3">Admin</h4>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div><label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Usuario</label><input type="text" id="auth-admin-user" class="input-admin font-bold text-indigo-600"></div>
+                            <div><label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Pass</label><input type="text" id="auth-admin-pass" class="input-admin font-bold text-slate-600"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-3xl shadow-xl overflow-hidden min-h-[600px] mt-8">
+            <div class="flex border-b border-slate-100 overflow-x-auto whitespace-nowrap bg-slate-50">
+                <button onclick="setTab('equipos')" class="tab-btn px-6 py-4 font-bold text-sm text-slate-500 hover:text-indigo-600 border-b-2 border-transparent transition" id="btn-equipos">🛡️ Equipos</button>
+                <button onclick="setTab('tabla')" class="tab-btn px-6 py-4 font-bold text-sm text-slate-500 hover:text-indigo-600 border-b-2 border-transparent transition" id="btn-tabla">📊 Tabla</button>
+                <button onclick="setTab('goleo')" class="tab-btn px-6 py-4 font-bold text-sm text-slate-500 hover:text-indigo-600 border-b-2 border-transparent transition" id="btn-goleo">⚽ Goleo</button>
+                
+                <button onclick="setTab('jornadas')" class="tab-btn hidden px-6 py-4 font-bold text-sm text-slate-500 hover:text-indigo-600 border-b-2 border-transparent transition" id="btn-jornadas">📅 Fixture</button>
+                <button onclick="setTab('mvp')" id="btn-mvp" class="tab-btn hidden px-6 py-4 font-bold text-sm text-purple-600 hover:text-purple-700 border-b-2 border-transparent transition">⭐ MVPs</button>
+                <button onclick="setTab('playoffs')" id="btn-playoffs" class="tab-btn hidden px-6 py-4 font-bold text-sm text-amber-600 hover:text-amber-700 border-b-2 border-transparent transition">🏆 Playoffs</button>
+                <button onclick="setTab('avisos')" id="btn-avisos" class="tab-btn hidden px-6 py-4 font-bold text-sm text-rose-600 hover:text-rose-700 border-b-2 border-transparent transition">📢 Avisos</button>
+                <button onclick="setTab('banners')" id="btn-banners" class="tab-btn hidden px-6 py-4 font-bold text-sm text-slate-500 hover:text-indigo-600 border-b-2 border-transparent transition">🖼️ Banners</button>
+                <button onclick="setTab('patros')" id="btn-patros" class="tab-btn hidden px-6 py-4 font-bold text-sm text-slate-500 hover:text-indigo-600 border-b-2 border-transparent transition">🤝 Socios</button>
+                <button onclick="window.location.href='galerias.html'" class="px-6 py-4 font-bold text-sm text-slate-500 hover:text-indigo-600 border-b-2 border-transparent hover:border-indigo-600 transition flex items-center gap-2"> 📸 Galerías</button>
+                
+                <button onclick="window.location.href='credenciales.html'" id="btn-credenciales" class="tab-btn hidden px-6 py-4 font-bold text-sm text-emerald-600 hover:text-emerald-700 border-b-2 border-transparent transition">🆔 Credenciales</button>
+            </div>
+
+            <div class="p-6">
+                <div id="view-equipos" class="tab-view hidden"><div class="flex justify-between items-center mb-6"><h3 class="font-black text-xl text-indigo-900">Listado de Equipos</h3><button onclick="openModal('equipos')" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-xs font-bold uppercase hover:bg-indigo-700">+ Nuevo Equipo</button></div><div id="grid-equipos" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div></div>
+                <div id="view-tabla" class="tab-view hidden"><div class="flex justify-between items-center mb-6"><div><h3 class="font-black text-xl text-indigo-900">Tabla General</h3></div><button onclick="openModal('tabla')" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-xs font-bold uppercase hover:bg-indigo-700">+ Agregar</button></div><div class="overflow-x-auto rounded-xl border border-slate-200"><table class="w-full text-sm text-left"><thead class="bg-slate-100 text-slate-600 font-bold uppercase text-[10px]"><tr><th class="p-3 text-center">#</th><th class="p-3">Equipo</th><th class="p-3 text-center">PJ</th><th class="p-3 text-center">PTS</th><th class="p-3 text-right">Acción</th></tr></thead><tbody id="table-tabla" class="divide-y divide-slate-100"></tbody></table></div></div>
+                <div id="view-goleo" class="tab-view hidden"><div class="flex justify-between items-center mb-6"><h3 class="font-black text-xl text-indigo-900">Goleadores</h3><button onclick="openModal('goleo')" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-xs font-bold uppercase hover:bg-indigo-700">+ Nuevo</button></div><div class="overflow-x-auto rounded-xl border border-slate-200"><table class="w-full text-sm text-left"><thead class="bg-slate-100 text-slate-600 font-bold uppercase text-[10px]"><tr><th class="p-3">Jugador</th><th class="p-3">Equipo</th><th class="p-3 text-center">Goles</th><th class="p-3 text-right">Acción</th></tr></thead><tbody id="table-goleo" class="divide-y divide-slate-100"></tbody></table></div></div>
+                
+                <div id="view-jornadas" class="tab-view hidden">
+                    <div class="mb-6 bg-indigo-50 border-l-4 border-indigo-500 p-4 rounded-r-xl flex flex-col md:flex-row justify-between items-center gap-4">
+                        <div><h3 class="font-black text-indigo-900 uppercase">Herramientas de Fixture</h3><p class="text-xs text-slate-500">Genera el rol o descarga el calendario.</p></div>
+                        <div class="flex gap-2">
+                            <button onclick="downloadAdminPDF()" class="bg-rose-600 hover:bg-rose-700 text-white px-6 py-3 rounded-lg font-black text-xs uppercase shadow-lg flex items-center gap-2">📄 Descargar PDF Oficial</button>
+                            <button onclick="generateFixture()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-black text-xs uppercase shadow-lg flex items-center gap-2">⚡ Generar Rol</button>
+                        </div>
+                    </div>
+                    <div class="flex flex-col md:flex-row justify-between items-center mb-6 bg-slate-50 p-4 rounded-xl border border-slate-200 gap-4">
+                        <div class="flex items-center gap-3 w-full md:w-auto"><span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Ver Jornada:</span><select id="jornada-selector" class="input-admin font-bold text-indigo-700 w-auto" onchange="changeJornadaView(this.value)"></select></div>
+                        <div class="flex items-center gap-3">
+                            <label class="flex items-center gap-2 cursor-pointer bg-white px-3 py-2 rounded border border-slate-200 shadow-sm hover:border-indigo-300"><input type="checkbox" id="jornada-active-check" onchange="toggleActiveJornada()"><span class="text-[10px] font-bold text-indigo-900 uppercase tracking-wide">Marcar como Activa (Index)</span></label>
+                            <button onclick="createNewJornada()" class="bg-emerald-500 text-white px-4 py-2 rounded-lg text-xs font-bold uppercase hover:bg-emerald-600 shadow-sm">+ Man.</button>
+                            <button onclick="deleteCurrentJornada()" class="bg-rose-500 text-white px-3 py-2 rounded-lg text-xs font-bold hover:bg-rose-600 shadow-sm">🗑️</button>
+                        </div>
+                    </div>
+                    <div id="grid-partidos" class="space-y-3"></div>
+                    <button onclick="addMatch()" class="w-full mt-4 py-3 border-2 border-dashed border-slate-300 rounded-xl text-slate-400 font-bold hover:text-indigo-600 uppercase tracking-widest">+ Partido Extra</button>
+                </div>
+                
+                <div id="view-mvp" class="tab-view hidden"><div class="flex justify-between items-center mb-6"><h3 class="font-black text-xl text-purple-600 uppercase italic">Jugadores Destacados</h3><button onclick="openModal('mvp')" class="bg-purple-600 text-white px-4 py-2 rounded-lg text-xs font-bold uppercase">+ Agregar MVP</button></div><div id="grid-mvps" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div></div>
+                
+                <div id="view-playoffs" class="tab-view hidden">
+                    <div class="mb-6"><h3 class="font-black text-xl text-amber-600 uppercase italic">Fase Final</h3></div>
+                    <div class="space-y-8">
+                        <div><h4 class="font-bold text-indigo-900 text-sm uppercase mb-3 border-b pb-1">Cuartos</h4><div id="grid-cuartos" class="grid md:grid-cols-2 gap-4"></div></div>
+                        <div><h4 class="font-bold text-indigo-900 text-sm uppercase mb-3 border-b pb-1">Semis</h4><div id="grid-semis" class="grid md:grid-cols-2 gap-4"></div></div>
+                        <div><h4 class="font-bold text-emerald-600 text-sm uppercase mb-3 border-b pb-1">Final</h4><div id="grid-final" class="grid md:grid-cols-1 gap-4"></div></div>
+                    </div>
+                </div>
+                
+                <div id="view-avisos" class="tab-view hidden"><div class="flex justify-between items-center mb-6"><h3 class="font-black text-xl text-rose-600 uppercase italic">Tablón</h3><button onclick="openModal('avisos')" class="bg-rose-600 text-white px-4 py-2 rounded-lg text-xs font-bold">+ Nuevo</button></div><div id="grid-avisos" class="space-y-4"></div></div>
+                <div id="view-banners" class="tab-view hidden"><button onclick="openModal('banners')" class="mb-4 bg-indigo-600 text-white px-4 py-2 rounded-lg text-xs font-bold">+ Banner</button><div id="grid-banners" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div></div>
+                <div id="view-patros" class="tab-view hidden"><button onclick="openModal('patros')" class="mb-4 bg-indigo-600 text-white px-4 py-2 rounded-lg text-xs font-bold">+ Socio</button><div id="grid-patros" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div></div>
+            </div>
+        </div>
+    </div>
+
+   <div id="universal-modal" class="fixed inset-0 bg-slate-900/90 hidden z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all">
+            <div class="bg-indigo-950 text-white p-4 flex justify-between items-center">
+                <h3 id="modal-title" class="font-bold uppercase tracking-widest text-sm">Editar</h3>
+                <button onclick="closeModal()" class="text-indigo-300 hover:text-white text-xl font-bold">&times;</button>
+            </div>
+            <div id="modal-body" class="p-6 space-y-4 max-h-[70vh] overflow-y-auto"></div>
+            <div id="modal-img-preview" class="px-6 pb-4 hidden text-center">
+                <img id="preview-img-tag" src="" class="h-24 mx-auto rounded border object-contain bg-slate-50">
+                <input type="hidden" id="hidden-base64">
+            </div>
+            <div class="p-4 bg-slate-50 border-t border-slate-100 flex justify-end gap-3">
+                <button onclick="closeModal()" class="px-4 py-2 text-xs font-bold text-slate-500 hover:text-slate-800">Cancelar</button>
+                <button id="btn-save-modal" class="bg-emerald-500 text-indigo-950 px-6 py-2 rounded-lg text-xs font-black uppercase hover:bg-emerald-400 shadow-md">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="config-modal" class="fixed inset-0 bg-black/90 hidden z-[60] flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl w-full max-w-sm p-6 border-t-8 border-indigo-600">
+            <h3 class="font-bold text-xl mb-2">Token GitHub</h3>
+            <p class="text-xs text-slate-500 mb-4">Pega tu llave (ghp_...) aquí:</p>
+            <input type="password" id="gh-token-input" class="w-full bg-slate-100 border p-2 rounded text-center font-bold mb-4" placeholder="ghp_...">
+            <div class="flex justify-end gap-2">
+                <button onclick="document.getElementById('config-modal').classList.add('hidden')" class="px-4 py-2 text-xs font-bold text-slate-500">Cancelar</button>
+                <button onclick="saveGitHubToken()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-xs font-bold">Guardar Llave</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="loading-overlay" class="hidden fixed inset-0 bg-black/90 z-[70] flex flex-col items-center justify-center text-white">
+        <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-indigo-500 mb-4"></div>
+        <h2 class="text-xl font-bold">Publicando cambios...</h2>
+        <p class="text-sm opacity-70">Esto tardará unos segundos.</p>
+    </div>
+        </div>
+    </div>
+    </div>
+
+<script>
+        var v = new Date().getTime();
+        document.write('<script src="assets/js/data.js?v=' + v + '"><\/script>');
+        document.write('<script src="assets/js/main.js?v=' + v + '"><\/script>');
+    </script>
+    <script>
+        // --- 1. CONFIGURACIÓN INICIAL Y ROLES ---
+        const role = sessionStorage.getItem('userRole');
+        if(!role) window.location.href = 'index.html';
+        document.getElementById('role-display').textContent = role === 'superadmin' ? 'Super Admin' : 'Admin';
+        
+        if(role === 'superadmin') {
+            document.getElementById('super-admin-area').classList.remove('hidden');
+            // AQUÍ AGREGAMOS 'credenciales' A LA LISTA PARA QUE SE VEA EL BOTÓN
+            ['jornadas','mvp','playoffs','avisos','banners','patros','credenciales'].forEach(id => { 
+                const btn = document.getElementById('btn-'+id); 
+                if(btn) btn.classList.remove('hidden'); 
+            });
+        }
+
+        // --- 2. BASE DE DATOS ---
+        let db = window.db || {}; 
+        const localDB = localStorage.getItem('ligaData');
+        if(localDB) { try { db = JSON.parse(localDB); } catch(e){ console.error("Error DB", e); } } 
+        
+        if(!db.equipos) db.equipos = [];
+        if(!db.jornadas) db.jornadas = [];
+        if(!db.tablaGeneral) db.tablaGeneral = [];
+        if(!db.tablaGoleo) db.tablaGoleo = [];
+        if(!db.avisos) db.avisos=[]; 
+        if(!db.playoffs) db.playoffs={cuartos:[],semis:[],final:[]}; 
+        if(db.jugadorJornada && !Array.isArray(db.jugadorJornada)) { db.jugadoresJornada=[db.jugadorJornada]; delete db.jugadorJornada; } 
+        if(!db.jugadoresJornada) db.jugadoresJornada=[]; 
+        if(!db.patrocinadores) db.patrocinadores=[]; 
+        if(!db.sliderImages) db.sliderImages=[];
+        if(!db.config) db.config = {};
+        if(!db.auth) db.auth={superUser:'super@liga.com',superPass:'super123',adminUser:'admin@liga.com',adminPass:'admin123'};
+
+        if(role === 'superadmin') {
+            if(document.getElementById('conf-fase')) document.getElementById('conf-fase').value = db.config.faseActual || 'regular';
+            if(document.getElementById('conf-wa')) document.getElementById('conf-wa').value = db.config.telefonoWhatsApp || '';
+            if(document.getElementById('conf-tema')) document.getElementById('conf-tema').value = db.config.tema || 'default';
+            if(db.config.fechaGranFinal && document.getElementById('conf-fecha')) document.getElementById('conf-fecha').value = db.config.fechaGranFinal;
+            if(document.getElementById('auth-super-user')) document.getElementById('auth-super-user').value = db.auth.superUser;
+            if(document.getElementById('auth-super-pass')) document.getElementById('auth-super-pass').value = db.auth.superPass;
+            if(document.getElementById('auth-admin-user')) document.getElementById('auth-admin-user').value = db.auth.adminUser;
+            if(document.getElementById('auth-admin-pass')) document.getElementById('auth-admin-pass').value = db.auth.adminPass;
+        }
+
+        let selectedJornadaIndex = 0;
+
+        // --- 3. SISTEMA DE PESTAÑAS (SEGURIDAD) ---
+        function setTab(tab) {
+            const restricted = ['jornadas', 'mvp', 'playoffs', 'avisos', 'banners', 'patros', 'credenciales'];
+            
+            if (role !== 'superadmin' && restricted.includes(tab)) { 
+                return setTab('equipos'); 
+            }
+            
+            document.querySelectorAll('.tab-view').forEach(el => el.classList.add('hidden'));
+            const activeView = document.getElementById('view-' + tab);
+            if(activeView) activeView.classList.remove('hidden');
+            
+            document.querySelectorAll('.tab-btn').forEach(btn => { 
+                btn.className = 'tab-btn px-6 py-4 font-bold text-sm text-slate-500 hover:text-indigo-600 border-b-2 border-transparent transition';
+                const idClean = btn.id.replace('btn-', '');
+                if(role !== 'superadmin' && restricted.includes(idClean)) {
+                    btn.classList.add('hidden');
+                }
+            });
+            
+            const btn = document.getElementById('btn-' + tab);
+            if(btn) {
+                btn.classList.remove('text-slate-500', 'border-transparent');
+                if(tab === 'playoffs') btn.classList.add('text-amber-600', 'border-amber-600');
+                else if(tab === 'avisos') btn.classList.add('text-rose-600', 'border-rose-600');
+                else if(tab === 'mvp') btn.classList.add('text-purple-600', 'border-purple-600');
+                else if(tab === 'credenciales') btn.classList.add('text-emerald-600', 'border-emerald-600');
+                else btn.classList.add('text-indigo-600', 'border-indigo-600');
+            }
+            
+            if(tab === 'jornadas') { 
+                renderJornadaSelector(); renderJornadaMatches(selectedJornadaIndex); 
+            } else {
+                renderView(tab);
+            }
+        }
+
+        // --- 4. LÓGICA DEL FIXTURE ---
+        function generateFixture() {
+            if (db.equipos.length < 2) { alert("Necesitas al menos 2 equipos."); return; }
+            if (!confirm("⚠️ Se borrarán todos los partidos actuales. ¿Crear nuevo rol?")) return;
+            const teams = [...db.equipos];
+            if (teams.length % 2 !== 0) teams.push({ id: 'BYE', nombre: 'Descansa' });
+            const numRounds = teams.length - 1;
+            const halfSize = teams.length / 2;
+            const newJornadas = [];
+            let teamIds = teams.map(t => t.id);
+            for (let round = 0; round < numRounds; round++) {
+                const matches = [];
+                for (let i = 0; i < halfSize; i++) {
+                    const tA = teamIds[i];
+                    const tB = teamIds[teams.length - 1 - i];
+                    if (tA !== 'BYE' && tB !== 'BYE') matches.push({ eqA: round%2===0?tA:tB, eqB: round%2===0?tB:tA, fecha: '', hora: '', cancha: '' });
+                }
+                newJornadas.push({ jornadaNum: round + 1, active: round === 0, partidos: matches });
+                const first = teamIds[0];
+                const rest = teamIds.slice(1);
+                rest.unshift(rest.pop());
+                teamIds = [first, ...rest];
+            }
+            db.jornadas = newJornadas;
+            selectedJornadaIndex = 0;
+            saveToMemory();
+            renderJornadaSelector();
+            renderJornadaMatches(0);
+            alert(`✅ Calendario generado.`);
+        }
+
+        function renderJornadaSelector() {
+            if(db.jornadas.length === 0) db.jornadas.push({jornadaNum: 1, active: true, partidos: []});
+            const sel = document.getElementById('jornada-selector');
+            sel.innerHTML = db.jornadas.map((j, i) => `<option value="${i}" ${i == selectedJornadaIndex ? 'selected' : ''}>Jornada ${j.jornadaNum} ${j.active ? '(Activa)' : ''}</option>`).join('');
+            if (selectedJornadaIndex >= db.jornadas.length) selectedJornadaIndex = 0;
+            document.getElementById('jornada-active-check').checked = db.jornadas[selectedJornadaIndex].active || false;
+        }
+
+        function changeJornadaView(index) {
+            selectedJornadaIndex = parseInt(index);
+            renderJornadaMatches(selectedJornadaIndex);
+            document.getElementById('jornada-active-check').checked = db.jornadas[selectedJornadaIndex].active || false;
+        }
+        function createNewJornada() {
+            const next = db.jornadas.length > 0 ? db.jornadas[db.jornadas.length-1].jornadaNum + 1 : 1;
+            db.jornadas.push({ jornadaNum: next, active: false, partidos: [] });
+            selectedJornadaIndex = db.jornadas.length - 1;
+            renderJornadaSelector(); renderJornadaMatches(selectedJornadaIndex);
+        }
+        function deleteCurrentJornada() {
+            if(confirm('¿Borrar Jornada?')) {
+                db.jornadas.splice(selectedJornadaIndex, 1);
+                selectedJornadaIndex = Math.max(0, selectedJornadaIndex - 1);
+                renderJornadaSelector(); renderJornadaMatches(selectedJornadaIndex);
+                saveToMemory();
+            }
+        }
+        function toggleActiveJornada() {
+            db.jornadas.forEach(j => j.active = false);
+            db.jornadas[selectedJornadaIndex].active = document.getElementById('jornada-active-check').checked;
+            renderJornadaSelector();
+            saveToMemory();
+        }
+        function renderJornadaMatches(index) {
+            const j = db.jornadas[index];
+            if(!j) return;
+            document.getElementById('grid-partidos').innerHTML = j.partidos.map((p, i) => `<div class="bg-white p-3 border rounded-xl flex flex-col md:flex-row gap-2 items-center shadow-sm"><select class="p-2 border rounded w-full md:w-1/4 text-xs font-bold" onchange="updateMatch(${i}, 'eqA', this.value)">${db.equipos.map(e => `<option value="${e.id}" ${e.id == p.eqA ? 'selected' : ''}>${e.nombre}</option>`).join('')}</select><span class="font-black text-slate-300">VS</span><select class="p-2 border rounded w-full md:w-1/4 text-xs font-bold" onchange="updateMatch(${i}, 'eqB', this.value)">${db.equipos.map(e => `<option value="${e.id}" ${e.id == p.eqB ? 'selected' : ''}>${e.nombre}</option>`).join('')}</select><input type="date" value="${p.fecha || ''}" class="p-2 border rounded w-full md:w-auto text-center text-xs" onchange="updateMatch(${i}, 'fecha', this.value)"><input type="text" value="${p.hora}" class="p-2 border rounded w-20 text-center text-xs" onchange="updateMatch(${i}, 'hora', this.value)" placeholder="Hora"><input type="text" value="${p.cancha}" class="p-2 border rounded w-24 text-center text-xs" onchange="updateMatch(${i}, 'cancha', this.value)" placeholder="Cancha"><button onclick="deleteMatch(${i})" class="text-rose-500 font-bold hover:bg-rose-50 p-2 rounded">✕</button></div>`).join('');
+        }
+        function updateMatch(i,f,v){db.jornadas[selectedJornadaIndex].partidos[i][f]=v; saveToMemory();}
+        function deleteMatch(i){if(confirm('Borrar?')){db.jornadas[selectedJornadaIndex].partidos.splice(i,1);renderJornadaMatches(selectedJornadaIndex); saveToMemory();}}
+        function addMatch(){ if(db.equipos.length<2)return alert('Faltan equipos'); db.jornadas[selectedJornadaIndex].partidos.push({eqA:db.equipos[0].id,eqB:db.equipos[1].id,fecha:'',hora:'10:00',cancha:'Cancha 1'}); renderJornadaMatches(selectedJornadaIndex); saveToMemory(); }
+
+        // --- 5. RENDERIZADO DE VISTAS ---
+        function renderView(type) {
+            if(type==='equipos') document.getElementById('grid-equipos').innerHTML = db.equipos.map((e,i) => `<div class="bg-white p-4 border rounded-xl flex justify-between items-center shadow-sm"><div class="flex gap-3 items-center"><img src="${e.logo}" class="w-8 h-8 rounded-full border"><span>${e.nombre}</span></div><div><button onclick="openModal('equipos',${i})" class="text-indigo-600 font-bold text-xs mr-2">Editar</button><button onclick="deleteItem('equipos',${i})" class="text-rose-500 font-bold text-xs">X</button></div></div>`).join('');
+            else if(type==='mvp') { const list = db.jugadoresJornada || []; document.getElementById('grid-mvps').innerHTML = list.map((p, i) => `<div class="bg-white border-2 border-purple-50 p-4 rounded-2xl shadow-sm flex items-center gap-4 relative"><img src="${p.foto}" class="w-20 h-20 rounded-full object-cover border-2 border-purple-200 bg-purple-50"><div class="flex-1"><h4 class="font-black text-lg text-purple-900 uppercase italic leading-none mb-1">${p.nombre}</h4><p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">${p.equipo}</p><div class="flex gap-3 mt-2"><span class="text-[9px] bg-slate-100 px-2 py-0.5 rounded font-bold">⚽ ${p.stats.goles}</span><span class="text-[9px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded font-bold">★ ${p.stats.valoracion}</span></div></div><div class="flex flex-col gap-2"><button onclick="openModal('mvp',${i})" class="text-purple-600 font-bold text-xs">✏️</button><button onclick="deleteItem('mvp',${i})" class="text-rose-500 font-bold text-xs">✕</button></div></div>`).join(''); }
+            else if(type==='avisos') document.getElementById('grid-avisos').innerHTML = db.avisos.map((a,i) => `<div class="bg-white p-4 border-l-4 ${a.tipo==='urgente'?'border-rose-500':'border-indigo-500'} rounded-r-xl shadow-sm flex justify-between"><div><h4 class="font-bold text-sm text-indigo-900">${a.titulo}</h4><p class="text-xs text-slate-500 mt-1">${a.mensaje}</p></div><div><button onclick="openModal('avisos',${i})" class="text-indigo-600 font-bold text-xs mr-2">Editar</button><button onclick="deleteItem('avisos',${i})" class="text-rose-500 font-bold text-xs">X</button></div></div>`).join('');
+            else if (type==='tabla') { const sorted=[...db.tablaGeneral].sort((a,b)=>(b.pts-a.pts)||(b.gf-b.gc)-(a.gf-a.gc)); document.getElementById('table-tabla').innerHTML=sorted.map((t)=>{const i=db.tablaGeneral.indexOf(t); const eq=db.equipos.find(e=>e.id==t.equipoId); return `<tr class="border-b"><td class="p-3 text-center font-bold">${t.pos}</td><td class="p-3 flex gap-2 items-center"><img src="${eq?.logo}" class="w-5 h-5 rounded-full">${eq?.nombre}</td><td class="p-3 text-center">${t.pj}</td><td class="p-3 text-center font-black text-indigo-600">${t.pts}</td><td class="p-3 text-right"><button onclick="openModal('tabla',${i})" class="text-indigo-600 font-bold text-xs mr-2">Editar</button><button onclick="deleteItem('tabla',${i})" class="text-rose-500 font-bold text-xs">X</button></td></tr>`}).join(''); }
+            else if (type==='goleo') { const sorted=[...db.tablaGoleo].sort((a,b)=>b.goles-a.goles); document.getElementById('table-goleo').innerHTML=sorted.map((p,idx)=>{const i=db.tablaGoleo.indexOf(p); const eq=db.equipos.find(e=>e.id==p.equipoId); return `<tr class="border-b"><td class="p-3 flex gap-2 items-center font-bold"><img src="${p.foto}" class="w-6 h-6 rounded-full">${p.nombre}</td><td class="p-3 text-xs uppercase">${eq?.nombre}</td><td class="p-3 text-center font-black text-emerald-500">${p.goles}</td><td class="p-3 text-right"><button onclick="openModal('goleo',${i})" class="text-indigo-600 font-bold text-xs mr-2">Editar</button><button onclick="deleteItem('goleo',${i})" class="text-rose-500 font-bold text-xs">X</button></td></tr>`}).join(''); }
+            else if (type==='playoffs') { 
+                ['cuartos','semis','final'].forEach(ph => {
+                    document.getElementById('grid-'+ph).innerHTML = db.playoffs[ph].map((m,i)=> { 
+                        const A = db.equipos.find(e => e.id == m.eqA); 
+                        const B = db.equipos.find(e => e.id == m.eqB); 
+                        const isFin = m.status === 'final' || (m.status === undefined && m.scoreA !== undefined);
+                        return `
+                        <div class="bg-white p-3 border rounded text-xs relative overflow-hidden">
+                            <div class="flex justify-between items-center mb-2">
+                                <div class="font-bold text-[10px] text-slate-400">${m.fecha||''} | ${m.hora||'00:00'}</div>
+                                <div class="px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider ${isFin?'bg-emerald-100 text-emerald-600':'bg-amber-100 text-amber-600'}">
+                                    ${isFin ? 'FINAL' : 'PENDIENTE'}
+                                </div>
+                            </div>
+                            <div class="flex justify-between font-bold items-center"><span>${A?.nombre||'TBD'}</span><span class="text-lg">${m.scoreA!==undefined?m.scoreA:'-'}</span></div>
+                            <div class="flex justify-between font-bold items-center mt-1"><span>${B?.nombre||'TBD'}</span><span class="text-lg">${m.scoreB!==undefined?m.scoreB:'-'}</span></div>
+                            <button onclick="openModal('playoffs',${i},'${ph}')" class="w-full bg-slate-100 mt-2 py-1 rounded text-indigo-600 font-bold hover:bg-slate-200">Editar Marcador</button>
+                        </div>`; 
+                    }).join('');
+                }); 
+            }
+            else if (type==='banners'||type==='patros') { const list=type=='banners'?db.sliderImages:db.patrocinadores; document.getElementById('grid-'+type).innerHTML=list.map((item,i)=>`<div class="bg-white p-2 border rounded relative group"><img src="${type=='banners'?item.img:item.logo}" class="h-10 object-contain mx-auto"><div class="absolute inset-0 bg-white/90 flex justify-center items-center gap-2 opacity-0 group-hover:opacity-100 transition"><button onclick="openModal('${type}',${i})" class="text-indigo-600 font-bold">Edit</button><button onclick="deleteItem('${type}',${i})" class="text-rose-500 font-bold">X</button></div></div>`).join(''); }
+        }
+
+        // --- 6. GESTIÓN DEL MODAL Y GUARDADO ---
+        let editType=null, editIdx=null, editPhase=null;
+
+       // --- BUSCA Y REEMPLAZA LA FUNCIÓN openModal COMPLETA POR ESTA ---
+        function openModal(type, index=null, phase=null) {
+            editType=type; editIdx=index; editPhase=phase;
+            const modal = document.getElementById('universal-modal');
+            const body = document.getElementById('modal-body');
+            const hidden64 = document.getElementById('hidden-base64');
+            const preview = document.getElementById('modal-img-preview');
+            
+            hidden64.value=''; preview.classList.add('hidden'); body.innerHTML='';
+            document.getElementById('modal-title').textContent = index === null ? 'Nuevo Registro' : 'Editar Registro';
+
+            if(type==='patros') { 
+                const d=editIdx!==null?db.patrocinadores[index]:{nombre:'',logo:'',link:''}; 
+                if(d.logo) showPreview(d.logo); 
+                body.innerHTML=`<div><label class="text-xs font-bold">Nombre</label><input id="inp-txt" class="input-admin" value="${d.nombre}"></div><div class="mt-2"><label class="text-xs font-bold">Enlace (URL)</label><input id="inp-link" class="input-admin" value="${d.link || ''}" placeholder="https://..."></div><div class="mt-2"><label class="file-upload-label"><input type="file" class="hidden" onchange="encodeImage(this)">📸 Logo</label></div>`; 
+            }
+            else if(type==='playoffs') { 
+                const d = db.playoffs[phase][index]; 
+                const opts = `<option value="">-- Por Definir --</option>`+db.equipos.map(e=>`<option value="${e.id}">${e.nombre}</option>`).join(''); 
+                body.innerHTML = `
+                <div class="grid grid-cols-3 gap-3 mb-4">
+                    <div><label class="text-[10px] font-bold text-slate-500 uppercase">Fecha</label><input type="date" id="p-fecha" class="input-admin" value="${d.fecha || ''}"></div>
+                    <div><label class="text-[10px] font-bold text-slate-500 uppercase">Hora</label><input type="time" id="p-hora" class="input-admin" value="${d.hora || ''}"></div>
+                    <div><label class="text-[10px] font-bold text-slate-500 uppercase">Cancha</label><input type="text" id="p-cancha" class="input-admin" value="${d.cancha || ''}"></div>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <label class="text-xs font-bold">Local</label><label class="text-xs font-bold">Goles</label>
+                    <select id="p-eqA" class="input-admin text-xs">${opts}</select>
+                    <input type="number" id="p-scA" class="input-admin" value="${d.scoreA!==undefined?d.scoreA:''}">
+                </div>
+                <div class="grid grid-cols-2 gap-2 mt-2">
+                    <select id="p-eqB" class="input-admin text-xs">${opts}</select>
+                    <input type="number" id="p-scB" class="input-admin" value="${d.scoreB!==undefined?d.scoreB:''}">
+                </div>
+                <div class="col-span-2 mt-3 pt-3 border-t border-slate-100">
+                    <label class="text-xs font-bold text-slate-500 uppercase">Estado del Partido</label>
+                    <select id="p-status" class="input-admin font-bold text-indigo-900 mt-1">
+                        <option value="pending" ${d.status!=='final'?'selected':''}>⏳ Pendiente / Por Jugar</option>
+                        <option value="final" ${d.status==='final'?'selected':''}>✅ Finalizado</option>
+                    </select>
+                </div>`; 
+                setTimeout(()=>{if(d.eqA)document.getElementById('p-eqA').value=d.eqA;if(d.eqB)document.getElementById('p-eqB').value=d.eqB},100); 
+            }
+            else if(type==='tabla') { 
+                // --- CORRECCIÓN 1: PROTECCIÓN DE ERROR ---
+                if (db.equipos.length === 0) {
+                    alert("⚠️ No hay equipos registrados. Por favor agrega equipos primero.");
+                    closeModal();
+                    return;
+                }
+                const firstId = db.equipos[0] ? db.equipos[0].id : 0; 
+                const d = editIdx!==null ? db.tablaGeneral[index] : {equipoId:firstId,pj:0,pts:0,gf:0,gc:0,pg:0,pe:0,pp:0}; 
+                // ------------------------------------------
+
+                const opts = db.equipos.map(e => `<option value="${e.id}" ${e.id==d.equipoId?'selected':''}>${e.nombre}</option>`).join(''); 
+                body.innerHTML = `<div class="mb-4"><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Equipo</label><select id="inp-eq" class="input-admin font-bold text-indigo-900">${opts}</select></div><div class="grid grid-cols-4 gap-3 bg-slate-50 p-3 rounded-xl border border-slate-100"><div class="col-span-4 border-b border-slate-200 pb-2 mb-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Estadísticas</div><div><label class="block text-[10px] font-bold text-center mb-1">PJ</label><input type="number" id="inp-pj" class="input-admin text-center" value="${d.pj}"></div><div><label class="block text-[10px] font-bold text-center mb-1 text-emerald-600">PG</label><input type="number" id="inp-pg" class="input-admin text-center" value="${d.pg}"></div><div><label class="block text-[10px] font-bold text-center mb-1 text-amber-600">PE</label><input type="number" id="inp-pe" class="input-admin text-center" value="${d.pe}"></div><div><label class="block text-[10px] font-bold text-center mb-1 text-rose-600">PP</label><input type="number" id="inp-pp" class="input-admin text-center" value="${d.pp}"></div><div class="col-span-4 mt-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Goles y Puntos</div><div><label class="block text-[10px] font-bold text-center mb-1">GF</label><input type="number" id="inp-gf" class="input-admin text-center" value="${d.gf}"></div><div><label class="block text-[10px] font-bold text-center mb-1">GC</label><input type="number" id="inp-gc" class="input-admin text-center" value="${d.gc}"></div><div class="col-span-2"><label class="block text-[10px] font-bold text-center mb-1 text-indigo-700">PUNTOS</label><input type="number" id="inp-pts" class="input-admin text-center font-black text-lg text-indigo-700 bg-indigo-50 border-indigo-200" value="${d.pts}"></div></div>`; 
+            }
+            else if(type==='mvp') { 
+                const data=index!==null?db.jugadoresJornada[index]:{nombre:"",equipo:"",frase:"",stats:{goles:0,asistencias:0,valoracion:0},foto:""}; 
+                if(data.foto)showPreview(data.foto); 
+                body.innerHTML=`<div><label class="text-xs font-bold">Nombre Jugador</label><input id="m-nom" class="input-admin" value="${data.nombre}"></div><div><label class="text-xs font-bold">Equipo</label><input id="m-eq" class="input-admin" value="${data.equipo}"></div><div><label class="text-xs font-bold">Frase/Motivo</label><textarea id="m-frase" class="input-admin h-16">${data.frase}</textarea></div><div class="grid grid-cols-3 gap-2"><div><label class="text-xs">Goles</label><input type="number" id="m-gol" class="input-admin" value="${data.stats.goles}"></div><div><label class="text-xs">Asist</label><input type="number" id="m-asi" class="input-admin" value="${data.stats.asistencias}"></div><div><label class="text-xs">Rating</label><input type="number" id="m-rat" class="input-admin" value="${data.stats.valoracion}"></div></div><div class="mt-2"><label class="file-upload-label"><input type="file" class="hidden" accept="image/*" onchange="encodeImage(this)">📸 Foto MVP</label></div>`; 
+            }
+            else if(type==='avisos') { 
+                const data=editIdx!==null?db.avisos[index]:{titulo:'',mensaje:'',tipo:'normal'}; 
+                body.innerHTML=`<div><label class="text-xs font-bold">Título</label><input id="a-tit" class="input-admin" value="${data.titulo}"></div><div class="mt-2"><label class="text-xs font-bold">Mensaje</label><textarea id="a-msg" class="input-admin h-24">${data.mensaje}</textarea></div><div class="mt-2"><label class="text-xs font-bold">Tipo</label><select id="a-tipo" class="input-admin"><option value="normal" ${data.tipo=='normal'?'selected':''}>Normal</option><option value="urgente" ${data.tipo=='urgente'?'selected':''}>Urgente</option></select></div>`; 
+            }
+            else if(type==='equipos') { 
+                const d=editIdx!==null?db.equipos[index]:{nombre:'',logo:''}; 
+                if(d.logo)showPreview(d.logo); 
+                body.innerHTML=`<input id="inp-name" class="input-admin" value="${d.nombre}" placeholder="Nombre del Equipo"><div class="mt-2"><label class="file-upload-label"><input type="file" class="hidden" onchange="encodeImage(this)">Logo</label></div>`; 
+            }
+            else if(type==='goleo') { 
+                const d=editIdx!==null?db.tablaGoleo[index]:{nombre:'',goles:0,equipoId:1,foto:''}; 
+                const opts=db.equipos.map(e=>`<option value="${e.id}" ${e.id==d.equipoId?'selected':''}>${e.nombre}</option>`).join(''); 
+                if(d.foto)showPreview(d.foto); 
+                body.innerHTML=`<input id="inp-nom" class="input-admin" value="${d.nombre}"><select id="inp-eq" class="input-admin mt-2">${opts}</select><input id="inp-gol" class="input-admin mt-2" value="${d.goles}"><div class="mt-2"><label class="file-upload-label"><input type="file" class="hidden" onchange="encodeImage(this)">Foto</label></div>`; 
+            }
+            else if(type==='banners') { 
+                const d=editIdx!==null?db.sliderImages[index]:{caption:'',img:''}; 
+                if(d.img)showPreview(d.img); 
+                body.innerHTML=`<input id="inp-txt" class="input-admin" value="${d.caption}"><div class="mt-2"><label class="file-upload-label"><input type="file" class="hidden" onchange="encodeImage(this)">Imagen</label></div>`; 
+            }
+            modal.classList.remove('hidden');
+        };
+
+        // --- BUSCA Y REEMPLAZA EL EVENT LISTENER DEL BOTÓN GUARDAR ---
+        document.getElementById('btn-save-modal').addEventListener('click', function() {
+            const imgVal = document.getElementById('hidden-base64').value;
+            
+            if(editType === 'equipos') {
+                const name = document.getElementById('inp-name').value;
+                if(!name) return alert('El nombre es obligatorio');
+                const prevLogo = editIdx !== null && db.equipos[editIdx] ? db.equipos[editIdx].logo : '';
+                // Definir ID
+                const newId = editIdx !== null ? db.equipos[editIdx].id : Date.now();
+                const newItem = { id: newId, nombre: name, logo: imgVal || prevLogo };
+                
+                if(editIdx !== null) {
+                    db.equipos[editIdx] = newItem;
+                } else {
+                    db.equipos.push(newItem);
+                    // --- CORRECCIÓN 2: AUTOMATIZACIÓN TABLA ---
+                    // Al crear equipo nuevo, insertarlo en la tabla general con 0 stats
+                    db.tablaGeneral.push({
+                        equipoId: newItem.id,
+                        pj: 0, pg: 0, pe: 0, pp: 0, gf: 0, gc: 0, pts: 0, pos: 0
+                    });
+                    // -------------------------------------------
+                }
+            }
+            else if(editType === 'tabla') {
+                const newItem = {
+                    equipoId: document.getElementById('inp-eq').value,
+                    pj: parseInt(document.getElementById('inp-pj').value) || 0,
+                    pg: parseInt(document.getElementById('inp-pg').value) || 0,
+                    pe: parseInt(document.getElementById('inp-pe').value) || 0,
+                    pp: parseInt(document.getElementById('inp-pp').value) || 0,
+                    gf: parseInt(document.getElementById('inp-gf').value) || 0,
+                    gc: parseInt(document.getElementById('inp-gc').value) || 0,
+                    pts: parseInt(document.getElementById('inp-pts').value) || 0
+                };
+                if(editIdx !== null) db.tablaGeneral[editIdx] = newItem; else db.tablaGeneral.push(newItem);
+            }
+            else if(editType === 'goleo') {
+                const prevImg = editIdx !== null ? db.tablaGoleo[editIdx].foto : '';
+                const newItem = { nombre: document.getElementById('inp-nom').value, equipoId: document.getElementById('inp-eq').value, goles: parseInt(document.getElementById('inp-gol').value) || 0, foto: imgVal || prevImg };
+                if(editIdx !== null) db.tablaGoleo[editIdx] = newItem; else db.tablaGoleo.push(newItem);
+            }
+            else if(editType === 'mvp') {
+                const prevImg = editIdx !== null ? db.jugadoresJornada[editIdx].foto : '';
+                const newItem = { nombre: document.getElementById('m-nom').value, equipo: document.getElementById('m-eq').value, frase: document.getElementById('m-frase').value, stats: { goles: parseInt(document.getElementById('m-gol').value)||0, asistencias: parseInt(document.getElementById('m-asi').value)||0, valoracion: parseFloat(document.getElementById('m-rat').value)||0 }, foto: imgVal || prevImg };
+                if(editIdx !== null) db.jugadoresJornada[editIdx] = newItem; else db.jugadoresJornada.push(newItem);
+            }
+            else if(editType === 'avisos') {
+                const newItem = { titulo: document.getElementById('a-tit').value, mensaje: document.getElementById('a-msg').value, tipo: document.getElementById('a-tipo').value };
+                if(editIdx !== null) db.avisos[editIdx] = newItem; else db.avisos.push(newItem);
+            }
+            else if(editType === 'playoffs') {
+                const match = db.playoffs[editPhase][editIdx];
+                match.fecha = document.getElementById('p-fecha').value; match.hora = document.getElementById('p-hora').value; match.cancha = document.getElementById('p-cancha').value; match.eqA = document.getElementById('p-eqA').value; match.eqB = document.getElementById('p-eqB').value;
+                const scA = document.getElementById('p-scA').value; const scB = document.getElementById('p-scB').value;
+                if(scA !== '' && scB !== '') { match.scoreA = parseInt(scA); match.scoreB = parseInt(scB); } else { delete match.scoreA; delete match.scoreB; }
+                match.status = document.getElementById('p-status').value;
+            }
+            else if(editType === 'banners') {
+                const prevImg = editIdx !== null ? db.sliderImages[editIdx].img : '';
+                const newItem = { caption: document.getElementById('inp-txt').value, img: imgVal || prevImg };
+                if(editIdx !== null) db.sliderImages[editIdx] = newItem; else db.sliderImages.push(newItem);
+            }
+            else if(editType === 'patros') {
+                const prevImg = editIdx !== null ? db.patrocinadores[editIdx].logo : '';
+                const newItem = { nombre: document.getElementById('inp-txt').value, link: document.getElementById('inp-link').value, logo: imgVal || prevImg };
+                if(editIdx !== null) db.patrocinadores[editIdx] = newItem; else db.patrocinadores.push(newItem);
+            }
+
+            saveToMemory(); 
+            closeModal();
+            renderView(editType);
+        });
+
+        function encodeImage(input){if(input.files&&input.files[0]){const r=new FileReader();r.onload=(e)=>{showPreview(e.target.result);document.getElementById('hidden-base64').value=e.target.result;};r.readAsDataURL(input.files[0]);}}
+        function showPreview(src){document.getElementById('preview-img-tag').src=src;document.getElementById('modal-img-preview').classList.remove('hidden');}
+        function closeModal(){document.getElementById('universal-modal').classList.add('hidden');}
+        
+        function deleteItem(type,idx){
+            if(!confirm('¿Borrar elemento?')) return;
+            if(type=='mvp') db.jugadoresJornada.splice(idx,1); 
+            else if(type=='avisos') db.avisos.splice(idx,1); 
+            else if(type=='equipos') db.equipos.splice(idx,1); 
+            else if(type=='tabla') db.tablaGeneral.splice(idx,1); 
+            else if(type=='goleo') db.tablaGoleo.splice(idx,1); 
+            else if(type=='banners') db.sliderImages.splice(idx,1); 
+            else if(type=='patros') db.patrocinadores.splice(idx,1); 
+            saveToMemory(); renderView(type); 
+        }
+        // --- LÓGICA GITHUB ---
+        const REPO_OWNER = "fut6"; 
+        const REPO_NAME = "fut6.github.io"; 
+        const FILE_PATH = "assets/js/data.js";
+
+        function openConfigModal() {
+            document.getElementById('gh-token-input').value = localStorage.getItem('gh_token') || '';
+            document.getElementById('config-modal').classList.remove('hidden');
+        }
+
+        function saveGitHubToken() { 
+            const t = document.getElementById('gh-token-input').value.trim(); 
+            if(t){ localStorage.setItem('gh_token', t); alert("✅ Token guardado."); document.getElementById('config-modal').classList.add('hidden'); } 
+        }
+
+        async function publishToGitHub() {
+            const token = localStorage.getItem('gh_token'); 
+            if(!token) return alert("⚠️ Configura tu Token primero en el botón de engrane (⚙️).");
+            
+            if(!confirm("¿Publicar cambios en internet?")) return;
+            
+            document.getElementById('loading-overlay')?.classList.remove('hidden');
+
+            try {
+                const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
+                const getResp = await fetch(url, { headers: { 'Authorization': `token ${token}` } });
+                if(!getResp.ok) throw new Error("Error de conexión. Verifica tu Token.");
+                const fileData = await getResp.json();
+                
+                // Asegurar que no se pierda la galería al publicar
+                if((!db.galeria || db.galeria.length === 0) && window.db && window.db.galeria) {
+                    db.galeria = window.db.galeria;
+                }
+                
+                const newContent = "window.db = " + JSON.stringify(db, null, 2) + ";";
+                const contentEncoded = btoa(unescape(encodeURIComponent(newContent)));
+                
+                const putResp = await fetch(url, { 
+                    method: 'PUT', 
+                    headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify({ message: "Update via Admin Panel", content: contentEncoded, sha: fileData.sha }) 
+                });
+                
+                if(!putResp.ok) throw new Error("Error al subir.");
+                alert("✅ ¡PUBLICADO! Tu página se actualizará en 1 minuto.");
+                
+            } catch (e) { 
+                alert("❌ Error: " + e.message); 
+            } finally { 
+                document.getElementById('loading-overlay')?.classList.add('hidden'); 
+            }
+        }
+        
+        function saveToMemory(alertUser = false){ 
+            if(role === 'superadmin') {
+                try {
+                   if(document.getElementById('conf-fase')) db.config.faseActual = document.getElementById('conf-fase').value;
+                   if(document.getElementById('conf-tema')) db.config.tema = document.getElementById('conf-tema').value; 
+                   if(document.getElementById('conf-wa')) db.config.telefonoWhatsApp = document.getElementById('conf-wa').value;
+                   if(document.getElementById('conf-fecha') && db.config.fechaGranFinal) db.config.fechaGranFinal = document.getElementById('conf-fecha').value;
+                   if(document.getElementById('auth-super-user')) db.auth.superUser = document.getElementById('auth-super-user').value;
+                   if(document.getElementById('auth-super-pass')) db.auth.superPass = document.getElementById('auth-super-pass').value;
+                   if(document.getElementById('auth-admin-user')) db.auth.adminUser = document.getElementById('auth-admin-user').value;
+                   if(document.getElementById('auth-admin-pass')) db.auth.adminPass = document.getElementById('auth-admin-pass').value;
+                } catch(e){}
+            }
+            localStorage.setItem('ligaData', JSON.stringify(db));
+            if(alertUser) alert('¡Guardado correctamente!');
+        }
+
+        // --- 7. FUNCIÓN PDF FINAL CON LEYENDA (ALINEADA Y AISLADA) ---
+        function downloadAdminPDF() {
+            if (!db.jornadas || db.jornadas.length === 0) { alert('⚠️ No hay jornadas registradas.'); return; }
+            const scrollY = window.scrollY;
+            const mainContent = Array.from(document.body.children);
+            mainContent.forEach(el => el.style.display = 'none');
+
+            const container = document.createElement('div');
+            container.style.width = '750px'; 
+            container.style.backgroundColor = '#ffffff';
+            container.style.margin = '0 auto';
+            container.style.padding = '20px';
+            container.style.display = 'block';
+
+            const jornadasHTML = db.jornadas.map(j => {
+                const rows = j.partidos.map(p => {
+                    const eqA = db.equipos.find(e => e.id == p.eqA);
+                    const eqB = db.equipos.find(e => e.id == p.eqB);
+                    return `<tr style="border-bottom: 1px solid #e2e8f0;"><td style="width: 20%; padding: 8px 0; font-size: 10px; font-weight: bold; color: #64748b; text-transform: uppercase;">${p.fecha || '—'} <br> ${p.hora || '—'}</td><td style="width: 35%; padding: 8px 5px; text-align: right; font-size: 11px; font-weight: bold; color: #1e293b; text-transform: uppercase;">${eqA?.nombre || 'Equipo A'}</td><td style="width: 10%; padding: 8px 0; text-align: center; font-size: 12px; font-weight: 900; color: #cbd5e1;">VS</td><td style="width: 35%; padding: 8px 5px; text-align: left; font-size: 11px; font-weight: bold; color: #1e293b; text-transform: uppercase;">${eqB?.nombre || 'Equipo B'}</td></tr>`;
+                }).join('');
+                return `<div style="margin-bottom: 30px; page-break-inside: avoid;"><div style="background-color: #e0e7ff; border-left: 5px solid #4f46e5; padding: 8px 15px; margin-bottom: 10px; border-radius: 4px;"><h3 style="margin: 0; color: #312e81; font-size: 14px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px;">Jornada ${j.jornadaNum}</h3></div><table style="width: 100%; border-collapse: collapse;">${rows}</table></div>`;
+            }).join('');
+
+            // AQUÍ ESTÁ EL CAMBIO DE LA LEYENDA
+            container.innerHTML = `<div style="font-family: Arial, sans-serif; color: #333;"><table style="width: 100%; border-bottom: 4px solid #312e81; margin-bottom: 30px; border-collapse: collapse;"><tr><td style="vertical-align: middle; padding-bottom: 15px;"><table style="width: auto;"><tr><td style="padding-right: 15px;"><img src="assets/images/logo2.png" onerror="this.style.display='none'" style="height: 60px; width: auto; display: block;"></td><td><h1 style="font-size: 24px; font-weight: 900; color: #312e81; margin: 0; font-style: italic; line-height: 1;">LIGA SSA</h1><p style="font-size: 10px; font-weight: bold; color: #64748b; text-transform: uppercase; letter-spacing: 3px; margin: 5px 0 0 0;">Calendario Oficial</p></td></tr></table></td><td style="text-align: right; vertical-align: middle; padding-bottom: 15px;"><p style="font-size: 10px; font-weight: bold; color: #64748b; text-transform: uppercase; margin: 0;">Temporada</p><p style="font-size: 14px; font-weight: 900; color: #059669; text-transform: uppercase; margin: 0;">Clausura 2025</p></td></tr></table>${jornadasHTML}<div style="margin-top: 40px; padding-top: 15px; border-top: 1px solid #cbd5e1; text-align: center;"><p style="font-size: 10px; font-weight: 900; color: #94a3b8; text-transform: uppercase; letter-spacing: 2px; margin: 0 0 5px 0;">GENERADO AUTOMÁTICAMENTE POR EL SISTEMA DE LIGA SSA</p><p style="font-size: 10px; font-weight: 900; color: #94a3b8; text-transform: uppercase; letter-spacing: 2px; margin: 0;">SITIO DESARROLLADO POR EL ING. ALBERTO DE JESUS</p></div></div>`;
+            document.body.appendChild(container);
+
+            const opt = { margin: [0.3, 0.3, 0.3, 0.3], filename: 'Rol_Juegos_SSA_Oficial.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true, scrollY: 0 }, jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' } };
+           // ... (aquí termina tu función downloadAdminPDF)
+            setTimeout(() => {
+                html2pdf().set(opt).from(container).save().finally(() => { document.body.removeChild(container); mainContent.forEach(el => el.style.display = ''); window.scrollTo(0, scrollY); });
+            }, 500);
+        }
+        
+        function logout(){ sessionStorage.removeItem('userRole'); window.location.href='index.html'; }
+        
+        // ESTA DEBE SER LA ÚLTIMA LÍNEA DE CÓDIGO JS:
+        setTab('equipos');
+        
+    </script>
+</body>
+</html>

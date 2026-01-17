@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <link rel="icon" type="image/x-icon" href="assets/images/log3.png"> 
+    <title>Jornadas - Liga SSA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #F8FAFC; }
+        .font-sport { font-family: 'Chakra Petch', sans-serif; }
+    </style>
+</head>
+<body class="text-slate-800 antialiased selection:bg-indigo-600 selection:text-white">
+
+    <header class="bg-indigo-950 text-white sticky top-0 z-50 shadow-2xl border-b-4 border-emerald-500">
+        <nav class="container mx-auto px-4 h-20 flex justify-between items-center">
+            <a href="index.html" class="flex items-center gap-3 group">
+                <div class="bg-white/10 p-2 rounded-xl group-hover:rotate-6 transition-transform border border-white/10">
+                    <img src="assets/images/logo2.png" class="h-8 w-8 brightness-200">
+                </div>
+                <div class="flex flex-col">
+                    <span class="font-sport font-black text-2xl italic tracking-wide leading-none">LIGA<span class="text-emerald-400">SSA</span></span>
+                    <span class="text-[8px] font-bold text-indigo-300 uppercase tracking-[0.3em] leading-none ml-0.5">Oficial</span>
+                </div>
+            </a>
+            
+            <div class="hidden md:flex gap-8 text-[11px] font-black uppercase tracking-[0.15em] items-center text-slate-300">
+                <a href="index.html" class="hover:text-emerald-400 transition">Inicio</a>
+                <a href="tabla.html" class="hover:text-emerald-400 transition">Tabla</a>
+                <a href="goleo.html" class="hover:text-emerald-400 transition">Goleo</a>
+                <a href="equipos.html" class="hover:text-emerald-400 transition">Equipos</a>
+                <a href="jornadas.html" class="text-emerald-400 relative after:content-[''] after:block after:w-full after:h-0.5 after:bg-emerald-400 after:absolute after:-bottom-2">Jornadas</a>
+                <a href="galeria.html" class="hover:text-emerald-400 transition">Galería</a>
+                <a href="informacion.html" class="bg-white/10 border border-white/20 px-4 py-2 rounded-full hover:bg-emerald-400 hover:text-indigo-900 transition">Info</a>
+            </div>
+
+            <button id="mobile-toggle" class="md:hidden text-2xl focus:outline-none">☰</button>
+        </nav>
+        
+        <div id="mobile-menu" class="hidden bg-indigo-900 p-4 md:hidden border-t border-indigo-800 absolute w-full shadow-2xl z-50">
+            <a href="index.html" class="block py-3 font-bold hover:text-emerald-400 border-b border-indigo-800 text-sm">Inicio</a>
+            <a href="tabla.html" class="block py-3 font-bold hover:text-emerald-400 border-b border-indigo-800 text-sm">Tabla General</a>
+            <a href="goleo.html" class="block py-3 font-bold text-emerald-400 border-b border-indigo-800 text-sm">Goleo</a>
+            <a href="equipos.html" class="block py-3 font-bold hover:text-emerald-400 text-sm">Equipos</a>
+            <a href="jornadas.html" class="block py-3 font-bold hover:text-emerald-400 border-b border-indigo-800 text-sm">Jornadas</a>
+            <a href="galeria.html" class="block py-3 font-bold hover:text-emerald-400 border-b border-indigo-800 text-sm">Galería</a>
+            <a href="informacion.html" class="block py-3 font-bold text-emerald-400 border-b border-indigo-800 text-sm">Informacion</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-10 max-w-6xl min-h-screen">
+        
+        <div class="flex flex-col md:flex-row items-center justify-between gap-6 mb-16">
+            <div class="flex items-center gap-6">
+                <div class="h-16 w-2 bg-gradient-to-b from-indigo-600 to-emerald-400 rounded-full"></div>
+                <div>
+                    <h1 class="text-4xl md:text-5xl font-sport font-black uppercase italic text-indigo-950 leading-none">Calendario</h1>
+                    <p class="text-slate-400 text-xs font-bold tracking-[0.3em] uppercase mt-2">Próximos Encuentros</p>
+                </div>
+            </div>
+            
+            <div class="bg-indigo-900 text-white px-8 py-4 rounded-[2rem] shadow-xl shadow-indigo-200 border-b-4 border-indigo-800 relative group overflow-hidden">
+                <div class="absolute inset-0 bg-emerald-500/10 group-hover:bg-emerald-500/20 transition-colors"></div>
+                <span id="jornada-titulo" class="font-sport font-black text-2xl uppercase italic tracking-wider relative z-10">Cargando...</span>
+            </div>
+        </div>
+
+        <div id="jornadas-container" class="grid grid-cols-1 gap-6">
+            <div class="animate-pulse bg-white p-8 rounded-[2rem] border border-slate-100 h-32 w-full shadow-lg"></div>
+            <div class="animate-pulse bg-white p-8 rounded-[2rem] border border-slate-100 h-32 w-full shadow-lg"></div>
+        </div>
+
+    </main>
+
+    <footer class="bg-indigo-950 text-slate-400 py-16 border-t-8 border-emerald-500 relative overflow-hidden">
+        <div class="container mx-auto px-4 text-center relative z-10">
+            <div class="flex justify-center items-center gap-4 mb-10">
+                <img src="assets/images/logo2.png" class="h-12 w-12 grayscale opacity-20">
+                <span class="font-sport font-black text-3xl italic text-slate-700 tracking-wide">LIGA SSA</span>
+            </div>
+            <button id="btn-admin-access" class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-600 hover:text-white border border-slate-800 hover:border-emerald-500 px-8 py-3 rounded-full transition duration-500 mb-8">
+                Acceso Administrativo
+            </button>
+            <p class="text-[10px] opacity-30">© 2025 Liga de Futbol 6 SSA. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    <div id="login-modal" class="fixed inset-0 bg-indigo-950/90 hidden z-[100] flex items-center justify-center p-4 backdrop-blur-md">
+        <div class="bg-white p-10 rounded-[2.5rem] shadow-2xl w-full max-w-sm relative border-t-8 border-indigo-600 transform scale-100 transition-transform">
+            <button id="close-modal-btn" class="absolute top-6 right-6 text-slate-300 hover:text-indigo-600 text-3xl transition-colors">&times;</button>
+            <div class="text-center mb-10">
+                <h2 class="text-3xl font-sport font-black text-indigo-900 mb-1 text-center uppercase italic">Hola Admin</h2>
+                <p class="text-xs text-slate-400 uppercase tracking-widest">Ingresa tus credenciales</p>
+            </div>
+            
+            <form id="login-form" class="space-y-6">
+                <div>
+                    <input type="email" id="email" class="w-full px-6 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-indigo-600 focus:bg-white text-sm font-bold transition-all text-center placeholder-slate-300" placeholder="usuario@liga.com">
+                </div>
+                <div>
+                    <input type="password" id="password" class="w-full px-6 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-indigo-600 focus:bg-white text-sm font-bold transition-all text-center placeholder-slate-300" placeholder="••••••">
+                </div>
+                <button type="submit" class="w-full bg-indigo-600 text-white font-black py-4 rounded-2xl hover:bg-indigo-500 transition shadow-xl shadow-indigo-600/30 uppercase tracking-widest text-xs mt-4 transform active:scale-95">Ingresar al Panel</button>
+            </form>
+        </div>
+    </div>
+
+<script>
+        (function() {
+            var v = new Date().getTime(); // Truco anti-caché
+            
+            // 1. Crear el script de DATOS
+            var dataScript = document.createElement('script');
+            dataScript.src = 'assets/js/data.js?v=' + v;
+            
+            // 2. Decirle: "AVÍSAME cuando termines de cargar"
+            dataScript.onload = function() {
+                // 3. SOLO AHORA cargamos el Main (el cerebro)
+                var mainScript = document.createElement('script');
+                mainScript.src = 'assets/js/main.js?v=' + v;
+                document.body.appendChild(mainScript);
+            };
+            
+            // 4. Iniciar la carga
+            document.body.appendChild(dataScript);
+        })();
+    </script>
+</body>
+</html>

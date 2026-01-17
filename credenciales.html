@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Credenciales Liga SSA - Final Ajustable</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700&family=Kanit:ital,wght@0,800;1,900&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- GENERAL --- */
+        body { font-family: 'Chakra Petch', sans-serif; background-color: #020617; color: white; }
+        
+        .input-cred { 
+            width: 100%; background: #0f172a; border: 1px solid #1e293b; 
+            padding: 10px; border-radius: 6px; outline: none; color: white; 
+            font-family: 'Chakra Petch', sans-serif; font-size: 14px;
+        }
+        .input-cred:focus { border-color: #0ea5e9; ring: 1px solid #0ea5e9; }
+
+        #preview-wrapper {
+            width: 100%; height: 580px; overflow: hidden;
+            display: flex; justify-content: center; align-items: center;
+            background-color: #0b1121; border: 2px dashed #1e3a8a; border-radius: 16px;
+            padding: 20px;
+        }
+
+        /* --- TARJETA --- */
+        #credential-card {
+            width: 1000px !important; height: 640px !important;
+            flex-shrink: 0; position: relative; overflow: hidden;
+            border-radius: 0; 
+            background: linear-gradient(115deg, #000428 0%, #004e92 50%, #00c6ff 100%);
+            box-shadow: 0 40px 90px rgba(0,0,0,0.8);
+            font-family: 'Chakra Petch', sans-serif;
+            color: white;
+            transform: scale(0.55); transform-origin: center;
+        }
+
+        /* --- CAPAS DE FONDO --- */
+        .watermark {
+            position: absolute; inset: 0;
+            background-image: url('assets/images/logo2.png');
+            background-size: 150px; background-repeat: repeat;
+            opacity: 0.05; transform: rotate(-8deg);
+            z-index: 0; mix-blend-mode: overlay;
+        }
+
+        .speed-lines {
+            position: absolute; top: 0; right: 0; width: 400px; height: 100%;
+            background: repeating-linear-gradient(-45deg, transparent, transparent 10px, rgba(255,255,255,0.03) 10px, rgba(255,255,255,0.03) 20px);
+            z-index: 1; pointer-events: none;
+        }
+
+        .shape-divider {
+            position: absolute; top: -50px; bottom: -50px; left: 360px; width: 80px;
+            background: linear-gradient(90deg, rgba(255,255,255,0.1), transparent);
+            transform: skewX(-15deg);
+            border-left: 3px solid rgba(0, 198, 255, 0.5);
+            z-index: 1;
+        }
+
+        /* --- IZQUIERDA --- */
+        .left-panel {
+            position: absolute; top: 0; left: 0; width: 380px; height: 100%;
+            z-index: 20;
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+            padding-top: 40px;
+            background: linear-gradient(90deg, rgba(0,0,0,0.3) 0%, transparent 100%);
+        }
+
+        .logo-circle {
+            width: 130px; height: 130px;
+            background: white; border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            box-shadow: 0 0 30px rgba(0, 198, 255, 0.4);
+            border: 4px solid #00c6ff; margin-bottom: 25px;
+        }
+        .logo-circle img { width: 100px; height: 100px; object-fit: contain; }
+
+        .photo-frame {
+            width: 260px; height: 260px;
+            border-radius: 50%; border: 8px solid #e2e8f0;
+            overflow: hidden; background: #64748b;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.7);
+            margin-bottom: 10px; position: relative;
+        }
+        .photo-frame img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* --- [1] CENTRADO JUGADOR --- */
+        .badge {
+            background: #00c6ff; color: #000428;
+            width: 220px; height: 48px; /* Altura Fija */
+            border-radius: 50px;
+            font-family: 'Kanit', sans-serif; font-style: italic; font-weight: 900;
+            text-transform: uppercase; letter-spacing: 1px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.4); border: 3px solid white;
+            font-size: 26px; 
+            margin-top: -30px; position: relative; z-index: 25;
+            
+            /* CENTRADO MATEMÁTICO */
+            display: flex; justify-content: center; align-items: center;
+            padding: 0; 
+        }
+        
+        /* Ajuste Manual JUGADOR: Si lo ves arriba/abajo, cambia el margin-top aquí */
+        .badge span { 
+            margin-top: -18px; /* Cambia a 2px o -2px si es necesario */
+            line-height: 1;
+        }
+
+        /* --- [2] CENTRADO FOLIO --- */
+        .folio-pill-left {
+            margin-top: 15px;
+            background: rgba(0, 4, 40, 0.85);
+            border: 1px solid #00c6ff; color: #00c6ff;
+            width: 160px; height: 36px; /* Altura Fija */
+            border-radius: 250px;
+            font-family: 'Chakra Petch', sans-serif; font-weight: 700; font-size: 18px;
+            letter-spacing: 1px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); z-index: 25;
+            
+            /* CENTRADO MATEMÁTICO */
+            display: flex; justify-content: center; align-items: center;
+            padding: 0; line-height: 1;
+        }
+        /* Ajuste Manual FOLIO */
+        .folio-pill-left span { 
+            margin-top: -12px; /* Cambia a 2px o -2px si es necesario */
+            line-height: 1;
+        }
+
+        /* --- DERECHA --- */
+        .right-panel {
+            position: absolute; top: 0; right: 0; width: 620px; height: 100%;
+            z-index: 20; padding: 30px 40px 20px 0;
+            display: flex; flex-direction: column;
+            text-align: right;
+        }
+
+        .header-section {
+            flex: 0 0 auto;
+            border-bottom: 2px solid rgba(255,255,255,0.2);
+            padding-bottom: 20px; margin-bottom: 15px;
+            width: 100%; display: flex; flex-direction: column; align-items: center;
+        }
+        
+        .title-main {
+            font-family: 'Kanit', sans-serif; font-style: italic; font-weight: 900;
+            font-size: 68px; line-height: 1; color: white; margin: 0;
+            text-shadow: 4px 4px 0px #000428, 0 0 25px rgba(0, 198, 255, 0.6);
+            text-align: center; white-space: nowrap;
+        }
+        
+        .title-torneo {
+            font-family: 'Kanit', sans-serif; font-weight: 800; font-style: italic;
+            font-size: 42px; color: #bae6fd; 
+            text-transform: uppercase; letter-spacing: 2px; margin-top: 10px;
+            text-shadow: 2px 2px 0px rgba(0,0,0,0.5); line-height: 1.1;
+        }
+        .title-vigencia {
+            font-family: 'Chakra Petch', sans-serif;
+            font-size: 20px; color: #e0f2fe; font-weight: 600;
+            text-transform: uppercase; margin-top: 5px; letter-spacing: 2px;
+            opacity: 0.9;
+        }
+
+        .body-section {
+            flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: flex-end;
+            padding-right: 15px;
+        }
+        
+        .label { 
+            font-size: 14px; 
+            color: #ffffff; /* BLANCO */
+            font-weight: 900; text-transform: uppercase; 
+            letter-spacing: 1px; margin-bottom: 6px; 
+            text-shadow: 2px 2px 0px #000000;
+            opacity: 1;
+        }
+
+        .player-name {
+            font-family: 'Kanit', sans-serif; font-style: italic; font-weight: 900;
+            font-size: 65px; line-height: 1.0;
+            color: white; text-transform: uppercase;
+            text-shadow: 3px 3px 0px #000428;
+            margin-bottom: 25px; text-align: right;
+            width: 100%; display: block;
+        }
+
+        /* --- [3] CENTRADO EQUIPO --- */
+        .team-box {
+            background: linear-gradient(90deg, rgba(255,255,255,0.05), rgba(255,255,255,0.15));
+            border: 1px solid rgba(255,255,255,0.3); border-right: 6px solid #00c6ff;
+            width: 320px; height: 60px; /* Altura Fija */
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            
+            /* CENTRADO MATEMÁTICO */
+            display: flex; justify-content: center; align-items: center; 
+            padding: 0;
+        }
+        
+        /* Ajuste Manual EQUIPO: Si lo ves arriba/abajo, cambia el margin-top aquí */
+        .team-text {
+            font-family: 'Kanit', sans-serif; font-weight: 800; font-style: italic;
+            font-size: 34px; color: #fff; text-transform: uppercase; margin: 0;
+            text-align: center; width: 100%; 
+            line-height: 1;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            margin-top: -18px; /* Cambia a 3px o -3px si es necesario */
+        }
+
+        .footer-section {
+            flex: 0 0 auto; height: 140px;
+            display: flex; justify-content: space-between; align-items: flex-end;
+            padding-bottom: 10px;
+        }
+
+        .sign-area { 
+            text-align: left; margin-bottom: 5px; margin-right: auto; padding-left: 20px;
+            border-left: 4px solid #00c6ff; z-index: 50; position: relative;
+        }
+        .sign-role-top { font-size: 12px; font-weight: 700; color: #00c6ff; margin-bottom: 2px; }
+        .sign-name { 
+            font-family: 'Chakra Petch', sans-serif; font-weight: 700; 
+            text-transform: uppercase; font-size: 18px; color: white; line-height: 1.2;
+        }
+        .sign-desc { font-size: 12px; font-weight: 500; text-transform: uppercase; color: #94a3b8; }
+
+        .qr-area { 
+            display: flex; flex-direction: column; align-items: center; width: 130px;
+            z-index: 50; position: relative;
+        }
+        
+        .qr-white {
+            background: white; padding: 6px; border-radius: 8px;
+            width: 120px; height: 120px;
+            display: flex; justify-content: center; align-items: center;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+        }
+        #qrcode img { display: block; width: 100%; height: auto; }
+
+        /* UTILIDADES */
+        .queue-item {
+            display: flex; justify-content: space-between; align-items: center;
+            background: #1e293b; padding: 8px 10px; border-radius: 4px;
+            margin-bottom: 4px; font-size: 12px; border: 1px solid #334155;
+        }
+        .queue-list { max-height: 150px; overflow-y: auto; }
+
+    </style>
+</head>
+<body class="p-4 min-h-screen text-slate-200">
+
+    <header class="max-w-7xl mx-auto flex justify-between items-center mb-4">
+        <button onclick="window.history.back()" class="bg-slate-800 border border-slate-700 px-4 py-2 rounded-lg font-bold text-white hover:bg-slate-700 transition">⬅ Volver</button>
+        <h1 class="text-2xl font-black text-white italic tracking-wider font-teko uppercase">Panel de Credenciales</h1>
+    </header>
+
+    <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <div class="lg:col-span-4 space-y-4">
+            <div class="bg-slate-900/90 p-5 rounded-xl border border-slate-800 shadow-xl relative z-50">
+                <h3 class="font-bold text-md text-blue-400 mb-3 border-b border-slate-700 pb-2 uppercase">Datos</h3>
+                
+                <div class="space-y-3">
+                    <div>
+                        <label class="text-[10px] text-slate-400 font-bold uppercase ml-1">Nombre Completo</label>
+                        <input type="text" id="cred-nombre" class="input-cred mt-1 w-full" placeholder="Nombre" oninput="updateTextOnly()">
+                    </div>
+
+                    <div>
+                        <label class="text-[10px] text-slate-400 font-bold uppercase ml-1">Equipo</label>
+                        <select id="cred-equipo" class="input-cred mt-1 cursor-pointer w-full" onchange="updateAll()">
+                            <option value="">-- Seleccionar --</option>
+                        </select>
+                    </div>
+
+                    <div class="bg-slate-800/50 p-2 rounded border border-slate-700/50 grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="text-blue-400 font-bold text-[10px] uppercase">Torneo</label>
+                            <input type="text" id="cred-torneo" class="input-cred text-center font-bold text-xs" value="TORNEO DECEMBRINO" oninput="updateTextOnly()">
+                        </div>
+                        <div>
+                            <label class="text-blue-400 font-bold text-[10px] uppercase">Vigencia</label>
+                            <input type="text" id="cred-vigencia" class="input-cred text-center text-xs" value="01 ENE 2026 - 31 DIC 2026" oninput="updateTextOnly()">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="text-[10px] text-slate-400 font-bold uppercase ml-1">Coordinador</label>
+                        <select id="cred-coordinador" class="input-cred mt-1 cursor-pointer w-full" onchange="updateTextOnly()">
+                            <option value="Ing. Alberto de Jesus Espinoza">Ing. Alberto de Jesus Espinoza</option>
+                            <option value="Lic. Rafael Rubio Aranda">Lic. Rafael Rubio Aranda</option>
+                        </select>
+                    </div>
+
+                    <div class="relative group mt-1 cursor-pointer">
+                        <input type="file" id="foto-input" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" accept="image/*" onchange="encodeImage(this)">
+                        <div class="bg-slate-800 border border-dashed border-slate-600 rounded p-2 text-center hover:border-blue-500 transition">
+                            <p class="text-sm font-bold text-white uppercase">📸 Cargar Foto</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between bg-black/40 p-2 rounded border border-slate-800">
+                        <span class="text-xs font-bold text-slate-500 uppercase">Folio: <span id="control-folio" class="text-blue-400">000</span></span>
+                        <button onclick="resetFolio()" class="text-[10px] text-slate-500 underline hover:text-white">Reset</button>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2 mt-2">
+                        <button onclick="addToQueue()" id="btn-add" class="bg-slate-700 hover:bg-slate-600 text-white font-bold py-2 rounded text-xs transition border border-slate-600">
+                            ➕ Agregar
+                        </button>
+                        <button onclick="downloadPDF()" id="btn-pdf" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 rounded text-xs transition disabled:opacity-50">
+                            📄 Crear PDF
+                        </button>
+                    </div>
+
+                    <div class="bg-slate-950 p-2 rounded border border-slate-800 mt-2">
+                        <div class="flex justify-between items-center mb-1">
+                            <h4 class="text-[10px] font-bold text-blue-300 uppercase">Cola (<span id="queue-count">0</span>)</h4>
+                            <button onclick="clearQueue()" class="text-[10px] text-red-400 hover:text-red-300 underline">Borrar</button>
+                        </div>
+                        <div id="queue-list" class="queue-list">
+                            <p class="text-center text-[10px] text-slate-600 italic">Vacío</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="lg:col-span-8">
+            <div id="preview-wrapper">
+                <div id="credential-card">
+                    <div class="watermark"></div>
+                    <div class="speed-lines"></div>
+                    <div class="shape-divider"></div>
+
+                    <div class="left-panel">
+                        <div class="logo-circle">
+                            <img src="assets/images/logo2.png" onerror="this.style.display='none'">
+                        </div>
+                        <div class="photo-frame">
+                            <img id="prev-foto" src="assets/images/default_player.png" onerror="this.src='https://via.placeholder.com/300/e2e8f0/888888?text=FOTO'">
+                        </div>
+                        <div class="badge"><span>JUGADOR</span></div>
+                        
+                        <div class="folio-pill-left">FOL: <span id="prev-folio">000</span></div>
+                    </div>
+
+                    <div class="right-panel">
+                        <div class="header-section">
+                            <h1 class="title-main">LIGA DE FUT 6 SSA</h1>
+                            <div class="title-torneo" id="prev-torneo">TORNEO DECEMBRINO</div>
+                            <div class="title-vigencia" id="prev-vigencia">VIGENCIA: 01 ENE 2026 - 31 DIC 2026</div>
+                        </div>
+
+                        <div class="body-section">
+                            <p class="label">ACREDITADO A FAVOR DE:</p>
+                            <h2 id="prev-nombre" class="player-name">NOMBRE JUGADOR</h2>
+                            
+                            <div class="mt-2" style="width:100%; display:flex; flex-direction:column; align-items:flex-end;">
+                                <span class="label" style="display:block; text-align:right;">EQUIPO:</span>
+                                <div class="team-box">
+                                    <p id="prev-equipo" class="team-text">SIN EQUIPO</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="footer-section">
+                            <div class="sign-area">
+                                <p class="sign-role-top">AUTORIZA:</p>
+                                <p id="prev-coordinador" class="sign-name">Ing. Alberto de Jesus</p>
+                                <p class="sign-desc">Coordinador General</p>
+                            </div>
+
+                            <div class="qr-area">
+                                <div class="qr-white">
+                                    <div id="qrcode"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <p class="text-center text-xs text-slate-500 mt-2 uppercase font-bold tracking-wider">Vista Previa (8.42 x 5.39 cm)</p>
+        </div>
+    </div>
+
+    <div id="loading-overlay" class="fixed inset-0 bg-black/90 z-50 hidden flex flex-col items-center justify-center backdrop-blur-md">
+        <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-blue-500"></div>
+        <p class="text-white mt-4 font-bold tracking-widest text-sm animate-pulse">PROCESANDO...</p>
+        <button onclick="document.getElementById('loading-overlay').classList.add('hidden')" class="mt-6 px-4 py-2 bg-red-600 rounded text-xs font-bold text-white hover:bg-red-500">CANCELAR</button>
+    </div>
+
+    <script>
+        let equipos = [];
+        const dummyTeams = [
+            { id: 1, nombre: "TIGRES FC" }, { id: 2, nombre: "REAL MADRID" },
+            { id: 3, nombre: "CONTRALORÍA" }, { id: 4, nombre: "SERV. PÚBLICOS" },
+            { id: 5, nombre: "SICT" }, { id: 6, nombre: "IGMOBA" }
+        ];
+
+        let printQueue = [];
+        let debounceTimer;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                const localDB = localStorage.getItem('ligaData');
+                if(localDB) equipos = JSON.parse(localDB).equipos || [];
+                else equipos = dummyTeams;
+            } catch(e) { equipos = dummyTeams; }
+
+            const select = document.getElementById('cred-equipo');
+            select.innerHTML = '<option value="">-- Seleccionar --</option>';
+            equipos.forEach(eq => select.appendChild(new Option(eq.nombre, eq.id)));
+
+            loadFolio();
+            updateAll();
+            updateQueueUI();
+        });
+
+        function updateTextOnly() {
+            const nombre = document.getElementById('cred-nombre').value.toUpperCase() || 'NOMBRE JUGADOR';
+            const torneo = document.getElementById('cred-torneo').value.toUpperCase();
+            const vigencia = document.getElementById('cred-vigencia').value.toUpperCase();
+            const coordinador = document.getElementById('cred-coordinador').value;
+
+            document.getElementById('prev-nombre').textContent = nombre;
+            document.getElementById('prev-torneo').textContent = torneo;
+            document.getElementById('prev-vigencia').textContent = `VIGENCIA: ${vigencia}`;
+            document.getElementById('prev-coordinador').textContent = coordinador;
+
+            const nameEl = document.getElementById('prev-nombre');
+            if(nombre.length > 20) nameEl.style.fontSize = "50px";
+            else nameEl.style.fontSize = "65px";
+
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(generateQR, 500); 
+        }
+
+        function updateAll() {
+            updateTextOnly();
+            updateTeam();
+            generateQR();
+        }
+
+        function updateTeam() {
+            const teamId = document.getElementById('cred-equipo').value;
+            const team = equipos.find(e => e.id == teamId);
+            const teamLabel = document.getElementById('prev-equipo');
+            if(team) teamLabel.textContent = team.nombre;
+            else teamLabel.textContent = "SIN EQUIPO";
+        }
+
+        function generateQR() {
+            const nombre = document.getElementById('cred-nombre').value.toUpperCase() || 'JUGADOR';
+            const folio = document.getElementById('prev-folio').textContent;
+            const teamLabel = document.getElementById('prev-equipo').textContent;
+            
+            const qrBox = document.getElementById('qrcode');
+            qrBox.innerHTML = ""; 
+            
+            let safeName = nombre.replace(/[|]/g, '');
+            let qrString = `LIGA SSA|FOL:${folio}|${safeName}|${teamLabel}`;
+            
+            new QRCode(qrBox, {
+                text: qrString,
+                width: 100, height: 100,
+                colorDark : "#000000", colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.L
+            });
+        }
+
+        function loadFolio() {
+            let current = parseInt(localStorage.getItem('folio_counter') || '0');
+            let next = current + 1; 
+            let formatted = next.toString().padStart(3, '0');
+            document.getElementById('prev-folio').textContent = formatted;
+            document.getElementById('control-folio').textContent = formatted;
+        }
+
+        function incrementFolio() {
+            let current = parseInt(localStorage.getItem('folio_counter') || '0');
+            localStorage.setItem('folio_counter', current + 1);
+            loadFolio();
+            updateTextOnly(); 
+        }
+
+        function resetFolio() {
+            if(confirm("¿Resetear folio?")) {
+                localStorage.setItem('folio_counter', '0');
+                loadFolio();
+                updateTextOnly();
+            }
+        }
+
+        function encodeImage(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = e => document.getElementById('prev-foto').src = e.target.result;
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        async function addToQueue() {
+            const overlay = document.getElementById('loading-overlay');
+            const element = document.getElementById('credential-card');
+            const nombre = document.getElementById('cred-nombre').value || 'Sin Nombre';
+            const folio = document.getElementById('prev-folio').textContent;
+            
+            overlay.classList.remove('hidden'); 
+
+            const safetyTimeout = setTimeout(() => {
+                overlay.classList.add('hidden');
+                alert("Tiempo agotado. Intenta de nuevo.");
+            }, 5000);
+
+            try {
+                await new Promise(r => setTimeout(r, 200));
+
+                const originalTransform = element.style.transform;
+                element.style.transform = "none";
+                element.style.borderRadius = "0"; 
+
+                const canvas = await html2canvas(element, {
+                    scale: 2, 
+                    useCORS: true, 
+                    allowTaint: false,
+                    backgroundColor: "#000428",
+                    logging: false,
+                    imageTimeout: 2000
+                });
+
+                element.style.transform = originalTransform;
+                element.style.borderRadius = "0";
+
+                const imgData = canvas.toDataURL('image/jpeg', 0.85);
+                
+                printQueue.push({ name: nombre, folio: folio, image: imgData });
+
+                clearTimeout(safetyTimeout); 
+                incrementFolio();
+                updateQueueUI();
+
+            } catch (error) {
+                console.error("Error:", error);
+                alert("Error al procesar.");
+            } finally {
+                overlay.classList.add('hidden'); 
+            }
+        }
+
+        function updateQueueUI() {
+            const list = document.getElementById('queue-list');
+            const count = document.getElementById('queue-count');
+            const btnPdf = document.getElementById('btn-pdf');
+            
+            count.textContent = printQueue.length;
+            btnPdf.disabled = printQueue.length === 0;
+
+            if (printQueue.length === 0) {
+                list.innerHTML = '<p class="text-center text-[10px] text-slate-600 italic">Vacío</p>';
+                return;
+            }
+
+            list.innerHTML = '';
+            printQueue.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = 'queue-item';
+                div.innerHTML = `
+                    <span class="truncate w-32 font-bold text-slate-300">${item.folio} - ${item.name}</span>
+                    <button onclick="removeFromQueue(${index})" class="text-red-500 hover:text-red-400 font-bold px-2">✕</button>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        function removeFromQueue(index) {
+            printQueue.splice(index, 1);
+            updateQueueUI();
+        }
+
+        function clearQueue() {
+            if(confirm("¿Borrar todo?")) {
+                printQueue = [];
+                updateQueueUI();
+            }
+        }
+
+        function downloadPDF() {
+            if (printQueue.length === 0) return;
+            const overlay = document.getElementById('loading-overlay');
+            overlay.classList.remove('hidden');
+
+            setTimeout(() => {
+                try {
+                    const { jsPDF } = window.jspdf;
+                    const doc = new jsPDF('p', 'mm', 'a4');
+                    
+                    const pageWidth = 210;
+                    const pageHeight = 297;
+                    const margin = 10;
+                    const cardWidth = 84.2; 
+                    const cardHeight = 53.9; 
+                    const gapX = 10; 
+                    const gapY = 10; 
+
+                    let x = margin;
+                    let y = margin;
+                    let countOnPage = 0;
+
+                    printQueue.forEach((item) => {
+                        if (y + cardHeight > pageHeight - margin) {
+                            doc.addPage();
+                            x = margin;
+                            y = margin;
+                            countOnPage = 0;
+                        }
+                        doc.addImage(item.image, 'JPEG', x, y, cardWidth, cardHeight);
+                        countOnPage++;
+                        if (countOnPage % 2 !== 0) {
+                            x += cardWidth + gapX;
+                        } else {
+                            x = margin;
+                            y += cardHeight + gapY;
+                        }
+                    });
+
+                    doc.save(`Credenciales_Lote_${new Date().toISOString().slice(0,10)}.pdf`);
+                } catch (e) {
+                    console.error(e);
+                    alert("Error generando PDF");
+                } finally {
+                    overlay.classList.add('hidden');
+                }
+            }, 500);
+        }
+    </script>
+</body>
+</html>
